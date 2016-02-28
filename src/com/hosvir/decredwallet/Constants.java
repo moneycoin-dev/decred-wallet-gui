@@ -108,7 +108,7 @@ public class Constants {
 		buildDate = "27/02/2016";
 		guiLog = new ArrayList<String>();
 		
-		userHome = System.getProperty("user.home") + File.separator + "JDecredWallet" + File.separator;
+		userHome = System.getProperty("user.home") + File.separator + "DecredWallet" + File.separator;
 		settingsFile = new File(Constants.userHome + "settings.conf");
 		dcrdCert = new File(Constants.userHome + ".dcrd" + File.separator + "rpc.cert");
 		walletCert = new File(Constants.userHome + ".dcrwallet" + File.separator + "rpc.cert");
