@@ -5,26 +5,31 @@ import java.awt.Graphics2D;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Button;
+import com.hosvir.decredwallet.gui.Component;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.Interface;
+import com.hosvir.decredwallet.gui.Main;
 
 /**
  * 
  * @author Troy
  *
  */
-public class AddressBook extends BaseGui {
-	private Button addButton;
+public class AddressBook extends Interface {
 	
 	public void init() {
-		addButton = new Button("Add",20,80,100,35,Constants.flatBlue,Constants.flatBlueHover);
+		this.components.add(new Button("add", Constants.addButtonText,20,80,100,35,Constants.flatBlue,Constants.flatBlueHover));
 	}
 	
+	@Override
 	public void update(long delta) {
 		super.update(delta);
 		
-		addButton.update(delta);
+		//For each component
+		for(Component c : components) {
+			if(c.containsMouse) Main.containsMouse = true;
+		}
 	}
 
 	@Override
@@ -41,20 +46,7 @@ public class AddressBook extends BaseGui {
 				120, 
 				Engine.getWidth(),
 				60,
-				null);	
-		
-		//Contact count
-		/*g.setColor(Constants.walletBalanceColor);
-		g.setFont(Constants.dcrFont);
-		g.drawString("Contacts", Engine.getWidth() / 2 - g.getFontMetrics().stringWidth("Contacts") - 10, 105);
-		
-		g.setColor(Constants.walletNameColor);
-		g.setFont(Constants.totalBalanceFont);
-		g.drawString("3", (Engine.getWidth() + 20) / 2, 108);*/
-		
-		//Add Contact button
-		addButton.render(g);
-		
+				null);			
 		
 		
 		//Content box
@@ -91,8 +83,13 @@ public class AddressBook extends BaseGui {
 		g.setColor(Constants.labelColor);
 		
 		g.drawString("Under construction.", Engine.getWidth() / 2 - (g.getFontMetrics().stringWidth("Under construction.") / 2), Engine.getHeight() / 2);
+		
+		
+		//Render
+		super.render(g);
 	}
 	
+	@Override
 	public void resize() {
 		
 	}

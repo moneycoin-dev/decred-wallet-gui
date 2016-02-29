@@ -11,52 +11,42 @@ import com.hosvir.decredwallet.Constants;
  * @author Troy
  *
  */
-public class Button extends BaseGui {
-	public String text;
-	public int x;
-	public int y;
-	public int width;
-	public int height;
-	public Color bgColor;
-	public Color hoverColor;
-	public boolean enabled;
+public class Button extends Component {
 	
 	/**
 	 * Construct a new button.
 	 * 
+	 * @param name
 	 * @param text
 	 * @param x
 	 * @param y
 	 * @param width
 	 * @param height
-	 * @param bgColor
+	 * @param backgroundColor
 	 * @param hoverColor
 	 */
-	public Button(String text, int x, int y, int width, int height, Color bgColor, Color hoverColor) {
-		this.text = text;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.bgColor = bgColor;
+	public Button(String name, String text, int x, int y, int width, int height, Color backgroundColor, Color hoverColor) {
+		super(name, text, 2, x, y, width, height);
+		this.textColor = Color.WHITE;
+		this.textFont = Constants.settingsFont;
+		this.borderColor = backgroundColor;
 		this.hoverColor = hoverColor;
 		
 		this.rectangles = new Rectangle[1];
 		this.rectangles[0] = new Rectangle(x,y,width,height);
 		
 		this.selectedId = -1;
-		this.enabled = true;
 	}
 
 	@Override
 	public void render(Graphics2D g) {
-		if(hoverId != -1) g.setColor(hoverColor); else g.setColor(bgColor);
-		if(!enabled) g.setColor(Constants.settingsSelectedColor);
+		if(hoverId != -1) g.setColor(hoverColor); else g.setColor(borderColor);
+		if(!enabled) g.setColor(disabledColor);
 		
 		g.fillRoundRect(x, y, width, height, 10, 10);
 		
-		g.setColor(Color.WHITE);
-		g.setFont(Constants.settingsFont);
+		g.setColor(textColor);
+		g.setFont(textFont);
 		g.drawString(text, x + (width / 2) - (g.getFontMetrics().stringWidth(text) / 2), y + (height / 2) + 8);
 	}
 	
@@ -64,6 +54,8 @@ public class Button extends BaseGui {
 		for(Rectangle r : rectangles){
 			r.x = x;
 			r.y = y;
+			r.width = width;
+			r.height = height;
 		}
 	}
 
@@ -71,6 +63,5 @@ public class Button extends BaseGui {
 	public boolean isActive() {
 		return this.selectedId == 0;
 	}
-
 
 }

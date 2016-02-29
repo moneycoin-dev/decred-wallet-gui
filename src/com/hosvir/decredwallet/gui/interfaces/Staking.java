@@ -5,15 +5,15 @@ import java.awt.Graphics2D;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.Interface;
 
 /**
  * 
  * @author Troy
  *
  */
-public class Staking extends BaseGui {
+public class Staking extends Interface {
 	
 	public void init() {
 

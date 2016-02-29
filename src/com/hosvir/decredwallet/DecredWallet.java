@@ -23,10 +23,12 @@ public class DecredWallet {
 		//Setup constants
 		Constants.initialise();
 		
+		System.out.println("Created by Fsig.");
+		System.out.println("Version: " + Constants.getVersion());
+		System.out.println("Build date: " + Constants.getBuildDate() + "\n");
 		Constants.guiLog.add("Created by Fsig.");
 		Constants.guiLog.add("Version: " + Constants.getVersion());
-		Constants.guiLog.add("Build date: " + Constants.getBuildDate());
-		Constants.guiLog.add("");
+		Constants.guiLog.add("Build date: " + Constants.getBuildDate() + "\n");
 		
 		// TODO look into changing this to use log files rather than killing process
 		if(Processes.getClosestProcess("dcrd") != -1){ 
@@ -38,9 +40,6 @@ public class DecredWallet {
 			Processes.killByName("dcrwallet");
 			Constants.log("Killed existing Wallet, we need to control the process.");
 		}
-		
-		//daemonReady = true;
-		//walletReady = true;
 		
 		//Launch GUI
 		Constants.setMainGui(new Main());
@@ -72,6 +71,8 @@ public class DecredWallet {
 			for(String s : Constants.getWalletProcess().log)
 				if(s.contains("RPC server listening on"))
 					Constants.setWalletReady(true);
+				else if(s.contains("invalid passphrase for master public key"))
+					System.out.println("Need public key");
 				
 			//Sleep
 			sleep(100);

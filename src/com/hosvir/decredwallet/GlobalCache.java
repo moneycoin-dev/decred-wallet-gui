@@ -15,7 +15,7 @@ public class GlobalCache extends Thread implements Updatable {
 	private boolean running;
 	public boolean forceUpdate;
 	private Timer updateTimer = new Timer(1000);
-	public double walletFee = 0.05;
+	public String walletFee = "0.05";
 	public ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
 	
 	public GlobalCache() {
@@ -45,7 +45,7 @@ public class GlobalCache extends Thread implements Updatable {
 			walletFee = Api.getWalletFee();
 			transactions = Api.getTransactions(null);
 			
-			if(updateTimer.timeLimit < 120000) updateTimer.timeLimit = 120000; 
+			if(updateTimer.timeLimit <= 180000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
 			updateTimer.reset();
 			forceUpdate = false;
 		}

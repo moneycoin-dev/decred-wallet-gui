@@ -1,6 +1,5 @@
 package com.hosvir.decredwallet.gui;
 
-import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 
@@ -16,7 +15,10 @@ import com.hosvir.decredwallet.Constants;
 public abstract class BaseGui implements GuiInterface {
 	public Rectangle[] rectangles;
 	public int hoverId = -1;
+	public int hoverItem = -1;
 	public int selectedId = 0;
+	public int selectedItem = 0;
+	public int previousSelectedItem = 0;
 	public int clickCount;
 	public boolean doubleClicked;
 	public boolean containsMouse;
@@ -40,7 +42,6 @@ public abstract class BaseGui implements GuiInterface {
 			if(rectangles != null)
 			for(int i = 0; i < rectangles.length; i++){
 				if(rectangles[i].contains(Mouse.point)){
-					Main.frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
 					containsMouse = true;
 					hoverId = i;
 	

@@ -21,13 +21,14 @@ import com.hosvir.decredwallet.Processes;
 import com.hosvir.decredwallet.gui.interfaces.AddressBook;
 import com.hosvir.decredwallet.gui.interfaces.Logs;
 import com.hosvir.decredwallet.gui.interfaces.Navbar;
-import com.hosvir.decredwallet.gui.interfaces.PassphrasePopup;
 import com.hosvir.decredwallet.gui.interfaces.Receive;
-import com.hosvir.decredwallet.gui.interfaces.RenameAccountPopup;
 import com.hosvir.decredwallet.gui.interfaces.Send;
 import com.hosvir.decredwallet.gui.interfaces.Settings;
 import com.hosvir.decredwallet.gui.interfaces.Staking;
 import com.hosvir.decredwallet.gui.interfaces.Wallet;
+import com.hosvir.decredwallet.gui.interfaces.popups.CreateAccount;
+import com.hosvir.decredwallet.gui.interfaces.popups.Passphrase;
+import com.hosvir.decredwallet.gui.interfaces.popups.RenameAccount;
 import com.hosvir.decredwallet.utils.JsonObject;
 import com.hosvir.decredwallet.utils.JsonObjects;
 
@@ -152,8 +153,10 @@ public class Main extends BaseGame {
 		Constants.guiInterfaces.add(new Receive());
 		Constants.guiInterfaces.add(new Logs());
 		Constants.guiInterfaces.add(new Settings());
-		Constants.guiInterfaces.add(new RenameAccountPopup());
-		Constants.guiInterfaces.add(new PassphrasePopup());
+		Constants.guiInterfaces.add(new CreateAccount());
+		Constants.guiInterfaces.add(new RenameAccount());
+		Constants.guiInterfaces.add(new Passphrase());
+		
 		
 		Constants.navbar.init();
 		for(BaseGui bg : Constants.guiInterfaces) bg.init();
@@ -211,13 +214,13 @@ public class Main extends BaseGame {
 	public void update(long delta) {
 		containsMouse = false;
 		
-		if(!canvas.hasFocus() && UPDATE_RATE != Constants.fpsMin){
+		/*if(!canvas.hasFocus() && UPDATE_RATE != Constants.fpsMin){
 			UPDATE_RATE = Constants.fpsMin;
 			UPDATE_PERIOD = 1000L / UPDATE_RATE;
 		}else if(UPDATE_RATE != Constants.fpsMax) {
 			UPDATE_RATE = Constants.fpsMax;
 			UPDATE_PERIOD = 1000L / UPDATE_RATE;
-		}
+		}*/
 		
 		
 		
@@ -250,13 +253,15 @@ public class Main extends BaseGame {
 				if(bg.isActive()){
 					bg.update(delta);
 					
-					if(bg.containsMouse) containsMouse = true;
+					if(bg.containsMouse && !bg.blockInput) containsMouse = true;
 				}
 			}
 			
 			//Restore cursor
 			if(!containsMouse){
 				Main.frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			}else{
+				Main.frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
 			}
 		}
 	}

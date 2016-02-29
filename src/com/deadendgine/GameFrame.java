@@ -41,7 +41,7 @@ public class GameFrame extends JFrame implements ComponentListener, WindowListen
 	 */
 	public GameFrame(String title, GameCanvas canvas){
 		this.setTitle(title);
-		this.setIconImage(Toolkit.getDefaultToolkit().getImage(GameFrame.class.getResource("/resources/tray-icon.png")));
+		this.setIconImage(Toolkit.getDefaultToolkit().getImage(GameFrame.class.getResource("/resources/icon.png")));
 		this.setSize(Engine.getWidth(), Engine.getHeight());
 		this.setPreferredSize(new Dimension(Engine.getPreferedWidth(), Engine.getPreferedHeight()));
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -140,12 +140,11 @@ public class GameFrame extends JFrame implements ComponentListener, WindowListen
 	
 	@Override
 	public void windowClosed(WindowEvent e) {
-		System.out.println("Closed window...");
+
 	}
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		System.out.println("Closing window...");
 		Engine.getGame().quit();
 	}
 

@@ -6,25 +6,55 @@ import java.awt.Rectangle;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
+import com.hosvir.decredwallet.gui.Component;
+import com.hosvir.decredwallet.gui.DropdownBox;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.Interface;
+import com.hosvir.decredwallet.gui.Label;
+import com.hosvir.decredwallet.gui.Main;
 
 /**
  * 
  * @author Troy
  *
  */
-public class Settings extends BaseGui {
+public class Settings extends Interface {
 	
 	public void init() {
 		rectangles = new Rectangle[3];
 		for(int i = 0; i < rectangles.length; i++){
 			rectangles[i] = new Rectangle(i*170,60,170,70);
 		}
+		
+		this.components.add(new Label("lang", Constants.languageLabel, 40, 190));
+		
+		DropdownBox dropbox = new DropdownBox("langSelect", 250, 170, Engine.getWidth() - 295, 30, Constants.getLangFiles().toArray(new String[Constants.getLangFiles().size()]));
+		dropbox.text = Constants.langFile;
+		
+		this.components.add(dropbox);
+	}
+	
+	@Override
+	public void update(long delta) {
+		super.update(delta);
+		
+		//For each component
+		for(Component c : components) {
+			if(c.containsMouse) Main.containsMouse = true;
+							
+			if(c instanceof DropdownBox) {
+				if(c.text != Constants.langFile) {
+					Constants.langFile = c.text.replace(".conf", "");
+					Constants.reloadLanguage();
+				}
+			}
+		}
 	}
 
 	@Override
 	public void render(Graphics2D g) {
+		//getComponentByName("langSelect").selectedId = -1;
+		
 		//Second nav
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 
@@ -57,9 +87,9 @@ public class Settings extends BaseGui {
 		
 		g.setFont(Constants.settingsFont);
 		g.setColor(Constants.walletBalanceColor);
-		g.drawString("MAIN", 60, 105);
-		g.drawString("SECURITY", 210, 105);
-		g.drawString("NETWORK", 375, 105);
+		g.drawString(Constants.mainButtonText, 60, 105);
+		g.drawString(Constants.securityButtonText, 210, 105);
+		g.drawString(Constants.networkButtonText, 375, 105);
 		
 		
 		//Content box
@@ -91,15 +121,21 @@ public class Settings extends BaseGui {
 				null);
 		
 		
-		//Draw log data
-		g.setFont(Constants.walletNameFont);
-		g.setColor(Constants.labelColor);
+		if(selectedId != 0){
+			//Draw log data
+			g.setFont(Constants.walletNameFont);
+			g.setColor(Constants.labelColor);
 		
-		g.drawString("Under construction.", Engine.getWidth() / 2 - (g.getFontMetrics().stringWidth("Under construction.") / 2), Engine.getHeight() / 2);
+			g.drawString("Under construction.", Engine.getWidth() / 2 - (g.getFontMetrics().stringWidth("Under construction.") / 2), Engine.getHeight() / 2);
+		}else{
+			super.render(g);
+		}
 	}
 	
+	@Override
 	public void resize() {
-		
+		getComponentByName("langSelect").width = Engine.getWidth() - 295;
+		getComponentByName("langSelect").resize();
 	}
 
 	@Override

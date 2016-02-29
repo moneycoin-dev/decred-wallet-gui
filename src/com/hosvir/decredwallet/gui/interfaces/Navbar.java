@@ -42,9 +42,9 @@ public class Navbar extends BaseGui {
 		//Icon
 		g.drawImage(Images.getIcon(), 
 				5, 
-				5, 
-				Images.getIcon().getWidth(),
-				Images.getIcon().getHeight(),
+				0, 
+				Images.getIcon().getWidth() -5,
+				Images.getIcon().getHeight() -5,
 				null);
 		
 		//Draw icons

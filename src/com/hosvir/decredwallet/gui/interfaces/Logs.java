@@ -6,15 +6,15 @@ import java.awt.Rectangle;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.Interface;
 
 /**
  * 
  * @author Troy
  *
  */
-public class Logs extends BaseGui {	
+public class Logs extends Interface {	
 	private int daemonStartLine = 0;
 	private int walletStartLine = 0;
 	private int guiStartLine = 0;
@@ -63,9 +63,9 @@ public class Logs extends BaseGui {
 		
 		g.setFont(Constants.settingsFont);
 		g.setColor(Constants.walletBalanceColor);
-		g.drawString("DAEMON", 40, 105);
-		g.drawString("WALLET", 215, 105);
-		g.drawString("GUI", 405, 105);
+		g.drawString(Constants.daemonButtonText, 40, 105);
+		g.drawString(Constants.walletButtonText, 215, 105);
+		g.drawString(Constants.guiButtonText, 405, 105);
 		
 		
 		//Content box
@@ -122,6 +122,7 @@ public class Logs extends BaseGui {
 		}
 	}
 	
+	@Override
 	public void resize() {
 		if(Constants.getDaemonProcess() != null && Constants.getWalletProcess() != null){
 			maxLines = (Engine.getHeight() - 220) / 18;

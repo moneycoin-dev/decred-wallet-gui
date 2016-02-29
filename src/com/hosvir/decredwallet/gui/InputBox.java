@@ -1,6 +1,5 @@
 package com.hosvir.decredwallet.gui;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -15,35 +14,21 @@ import com.hosvir.decredwallet.Constants;
  * @author Troy
  *
  */
-public class InputBox extends BaseGui implements KeyListener {
-	public String text;
-	public int x;
-	public int y;
-	public int width;
-	public int height;
-	public Color borderColor;
-	public Color hoverColor;
-	public boolean enabled = true;
-	public boolean password = false;
+public class InputBox extends Component implements KeyListener {
 	
 	/**
-	 * Construct a new button.
+	 * Construct a new InputBox.
 	 * 
+	 * @param name
 	 * @param x
 	 * @param y
 	 * @param width
 	 * @param height
-	 * @param borderColor
-	 * @param hoverColor
 	 */
-	public InputBox(int x, int y, int width, int height, Color borderColor, Color hoverColor) {
-		this.text = "";
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.borderColor = borderColor;
-		this.hoverColor = hoverColor;
+	public InputBox(String name, int x, int y, int width, int height) {
+		super(name, "", 3, x, y, width, height);
+		this.textColor = Constants.labelColor;
+		this.textFont = Constants.settingsFont;
 		
 		this.rectangles = new Rectangle[1];
 		this.rectangles[0] = new Rectangle(x,y,width,height);
@@ -64,10 +49,10 @@ public class InputBox extends BaseGui implements KeyListener {
 			g.fillRect(x, y, width, height);
 		}
 		
-		g.setColor(Constants.walletBalanceColor);
-		g.setFont(Constants.settingsFont);
+		g.setColor(textColor);
+		g.setFont(textFont);
 		
-		if(password){
+		if(textHidden){
 			String newText = "";
 			
 			for(int i = 0; i < text.length(); i++)
@@ -79,6 +64,7 @@ public class InputBox extends BaseGui implements KeyListener {
 		}
 	}
 	
+	@Override
 	public void resize() {
 		for(Rectangle r : rectangles){
 			r.x = x;

@@ -11,12 +11,12 @@ import com.deadendgine.utils.Timer;
 public class Account extends Thread implements Updatable {
 	private boolean running;
 	public boolean forceUpdate;
-	public String name;
 	private Timer updateTimer = new Timer(1000);
-	public double balance = 0.00;
-	public double pendingBalance = 0.00;
-	public double lockedBalance = 0.00;
-	public double totalBalance = 0.00;
+	public String name;
+	public String balance = "0";
+	public String pendingBalance = "0";
+	public String lockedBalance = "0";
+	public String totalBalance = "0";
 	public String[] addresses;
 	//public ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
 	
@@ -56,7 +56,7 @@ public class Account extends Thread implements Updatable {
 			addresses = Api.getAddressesByAccount(name).split(",");
 			//transactions = Api.getTransactions(name);
 			
-			if(updateTimer.timeLimit < 120000) updateTimer.timeLimit = 120000;
+			if(updateTimer.timeLimit <= 180000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
 			updateTimer.reset();
 			forceUpdate = false;
 		}

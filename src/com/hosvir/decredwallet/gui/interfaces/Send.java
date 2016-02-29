@@ -8,10 +8,12 @@ import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Account;
 import com.hosvir.decredwallet.Api;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Button;
+import com.hosvir.decredwallet.gui.Component;
+import com.hosvir.decredwallet.gui.Dialog;
 import com.hosvir.decredwallet.gui.Images;
 import com.hosvir.decredwallet.gui.InputBox;
+import com.hosvir.decredwallet.gui.Interface;
 import com.hosvir.decredwallet.gui.Main;
 
 /**
@@ -19,33 +21,45 @@ import com.hosvir.decredwallet.gui.Main;
  * @author Troy
  *
  */
-public class Send extends BaseGui {
+public class Send extends Interface {
 	private int headerThird;
-	private Button[] buttons;
-	private InputBox[] inputs;
 	private boolean readyToSend;
 	
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
-		buttons = new Button[2];
-		buttons[0] = new Button("Cancel", 350, 500, 100, 35, Constants.flatRed, Constants.flatRedHover);
-		buttons[1] = new Button("Send", Engine.getWidth() - 150, 500, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
-		buttons[1].enabled = false;
 		
-		inputs = new InputBox[5];
-		inputs[0] = new InputBox(500,200,Engine.getWidth() - 545,30,Constants.settingsSelectedColor,Constants.flatBlue);
-		inputs[1] = new InputBox(500,250,Engine.getWidth() - 545,30,Constants.settingsSelectedColor,Constants.flatBlue);
-		inputs[2] = new InputBox(500,300,Engine.getWidth() - 545,80,Constants.settingsSelectedColor,Constants.flatBlue);
-		inputs[3] = new InputBox(500,400,Engine.getWidth() - 545,30,Constants.settingsSelectedColor,Constants.flatBlue);
-		inputs[4] = new InputBox(500,450,Engine.getWidth() - 545,30,Constants.settingsSelectedColor,Constants.flatBlue);
+		Button cancel = new Button("cancel", Constants.cancelButtonText, 350, 500, 100, 35, Constants.flatRed, Constants.flatRedHover);
+		Button send = new Button("send", Constants.sendButtonText, Engine.getWidth() - 150, 500, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
+		send.enabled = false;
 		
-		inputs[0].enabled = false;
-		inputs[3].text = "" + Constants.globalCache.walletFee;
+		
+		InputBox from = new InputBox("from", 500,200,Engine.getWidth() - 545,30);
+		InputBox to = new InputBox("to", 500,250,Engine.getWidth() - 545,30);
+		InputBox comment = new InputBox("comment", 500,300,Engine.getWidth() - 545,80);
+		InputBox fee = new InputBox("fee", 500,400,Engine.getWidth() - 545,30);
+		InputBox amount = new InputBox("amount", 500,450,Engine.getWidth() - 545,30);
+		
+		from.enabled = false;
+		comment.enabled = false;
+		fee.text = Constants.globalCache.walletFee;
+		
+		
+		this.components.add(from);
+		this.components.add(to);
+		this.components.add(comment);
+		this.components.add(fee);
+		this.components.add(amount);
+		this.components.add(cancel);
+		this.components.add(send);
+		this.components.add(new Dialog("errordiag", ""));
 	}
 
+	@Override
 	public void update(long delta) {
+		//Allow diag closing
+		if(getComponentByName("errordiag").isActive()) getComponentByName("errordiag").update(delta);
+		
 		if(!blockInput){
-			buttons[0].y = 500;
 			if(rectangles == null && Constants.accounts.size() > 0){
 				rectangles = new Rectangle[Constants.accounts.size()];
 				
@@ -57,22 +71,24 @@ public class Send extends BaseGui {
 				}
 			}
 			
+			//Update
 			super.update(delta);
 			
 			//Assign name to input box
-			if(inputs[0].text != Constants.accounts.get(selectedId).name)
-				inputs[0].text = Constants.accounts.get(selectedId).name;
+			if(getComponentByName("from").text != Constants.accounts.get(selectedId).name)
+				getComponentByName("from").text = Constants.accounts.get(selectedId).name;
 			
 			//Set fee
-			if(inputs[3].text == "0.00") inputs[3].text = "" + Constants.globalCache.walletFee;
+			if(getComponentByName("fee").text == "0.00") getComponentByName("fee").text = "" + Constants.globalCache.walletFee;
 			
 			//Enable send
-			if(inputs[1].text != "" && inputs[3].text != "" && inputs[4].text != "") buttons[1].enabled = true; else buttons[1].enabled = false;
+			if(getComponentByName("to").text != "" && getComponentByName("fee").text != "" && getComponentByName("amount").text != "") 
+				getComponentByName("send").enabled = true; else getComponentByName("send").enabled = false;
 			
 			//Check for sending
-			if(Constants.getPrivatePassPhrase() != null && inputs[1].text != "") {
-				if(inputs[3].text != String.valueOf(Api.getWalletFee())){
-					if(Api.setTxFee(Double.valueOf(inputs[3].text))){
+			if(Constants.getPrivatePassPhrase() != null && getComponentByName("to").text != "") {
+				if(getComponentByName("fee").text != String.valueOf(Api.getWalletFee())){
+					if(Api.setTxFee(getComponentByName("fee").text)){
 						readyToSend = true;
 					}else{
 						readyToSend = false;
@@ -84,9 +100,21 @@ public class Send extends BaseGui {
 				if(readyToSend){
 					Api.unlockWallet(30);
 					
-					String txId = Api.sendFrom(inputs[0].text, inputs[1].text, inputs[2].text, Double.parseDouble(inputs[4].text));
+					String txId = Api.sendFrom(getComponentByName("from").text, 
+							getComponentByName("to").text, 
+							getComponentByName("comment").text, 
+							getComponentByName("amount").text);
+					
 					if(txId == ""){
 						Constants.log("Unable to send DCR. " + txId);
+					}else if(txId.contains("insufficient funds")){
+						Constants.log("Insufficient funds: " + txId);
+						getComponentByName("errordiag").text = Constants.insufficientFundsError;
+						
+						//Show dialog
+						this.blockInput = true;
+						Constants.navbar.blockInput = true;
+						getComponentByName("errordiag").selectedId = 0;
 					}else{
 						Constants.log("Sucess, transaction id: " + txId);
 					}
@@ -94,43 +122,45 @@ public class Send extends BaseGui {
 					Constants.log("Unable to set Wallet fee, sending cancelled.");
 				}
 				
+				//Clear password
+				Constants.setPrivatePassPhrase(null);
+				
 				//Force update accounts
 				for(Account a : Constants.accounts) a.forceUpdate = true;
+				Constants.globalCache.forceUpdate = true;
 				
-				Constants.setPrivatePassPhrase(null);
+				//Reset form
 				resetForm();
 			}
 		
-			for(Button b : buttons) {
-				b.update(delta);
+			//For each component
+			for(Component c : components) {
+				if(c.containsMouse) Main.containsMouse = true;
 				
-				if(b.containsMouse) Main.containsMouse = true;
-				
-				if(b.selectedId == 0 && b.enabled){
-					switch(b.text){
-					case "Cancel":
-						resetForm();
-						break;
-					case "Send":
-						blockInput = true;
-						Constants.navbar.blockInput = true;
-						unselectAllInputs();
-						Constants.guiInterfaces.get(Constants.guiInterfaces.size() -1).selectedId = 0;
-						break;
-					}			
-					
-					//Release button
-					b.selectedId = -1;
+				//Buttons
+				if(c instanceof Button) {					
+					if(c.selectedId == 0 && c.enabled){
+						switch(c.name){
+						case "cancel":
+							resetForm();
+							break;
+						case "send":
+							blockInput = true;
+							Constants.navbar.blockInput = true;
+							unselectAllInputs();
+							Constants.guiInterfaces.get(Constants.guiInterfaces.size() -1).selectedId = 0;
+							break;
+						}			
+						
+						//Release button
+						c.selectedId = -1;
+					}
 				}
-			}
-			
-			for(InputBox ib : inputs) {
-				ib.update(delta);
 				
-				if(ib.containsMouse && ib.enabled) Main.containsMouse = true;
-				
-				//Unselect other inputs
-				if(ib.selectedId == 0) unselectOtherInputs(ib);
+				//Input boxes
+				if(c instanceof InputBox) {
+					if(c.clickCount > 0) unselectOtherInputs(c);
+				}
 			}
 		
 			
@@ -207,7 +237,7 @@ public class Send extends BaseGui {
 			//DCR and Balance
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.dcrFont);
-			g.drawString("DCR", Engine.getWidth() / 2, 100);
+			g.drawString(Constants.dcrLabel, Engine.getWidth() / 2, 100);
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
@@ -217,9 +247,9 @@ public class Send extends BaseGui {
 			//Available, Pending and Locked
 			g.setColor(Constants.labelColor);
 			g.setFont(Constants.labelFont);
-			g.drawString("Available", Engine.getWidth() - (headerThird * 3), 125);
-			g.drawString("Pending", Engine.getWidth() - (headerThird * 2), 125);
-			g.drawString("Locked", Engine.getWidth() - (headerThird * 1), 125);
+			g.drawString(Constants.availableLabel, Engine.getWidth() - (headerThird * 3), 125);
+			g.drawString(Constants.pendingLabel, Engine.getWidth() - (headerThird * 2), 125);
+			g.drawString(Constants.lockedLabel, Engine.getWidth() - (headerThird * 1), 125);
 			
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);
@@ -261,28 +291,35 @@ public class Send extends BaseGui {
 			g.setFont(Constants.labelFont);
 			g.setColor(Constants.labelColor);
 			
-			g.drawString("From", 350, 220);
-			g.drawString("To", 350, 270);
-			g.drawString("Description", 350, 345);
-			g.drawString("Fee", 350, 425);
-			g.drawString("Amount", 350, 475);
+			g.drawString(Constants.fromLabel, 350, 220);
+			g.drawString(Constants.toLabel, 350, 270);
+			g.drawString(Constants.commentLabel, 350, 345);
+			g.drawString(Constants.feeLabel, 350, 425);
+			g.drawString(Constants.amountLabel, 350, 475);
 			
-			for(Button b : buttons) b.render(g);
-			for(InputBox ib : inputs) ib.render(g);
+			//Render
+			super.render(g);
 		}
 		
 		
 	}
 	
+	@Override
 	public void resize() {
 		headerThird = (Engine.getWidth() - 200) / 4;
-		buttons[1].x = Engine.getWidth() - 150;
 		
-		for(Button b : buttons) b.resize();
-		for(InputBox ib : inputs) {
-			ib.width = Engine.getWidth() - 545; 
-			ib.resize();
+		//Resize send button
+		getComponentByName("send").x = Engine.getWidth() - 150;
+		getComponentByName("send").resize();
+
+		//Resize input boxes
+		for(Component c : components) {
+			if(c instanceof InputBox){
+				c.width = Engine.getWidth() - 545; 
+				c.resize();
+			}
 		}
+
 	}
 
 	@Override
@@ -295,9 +332,10 @@ public class Send extends BaseGui {
 	 * 
 	 * @param ibb
 	 */
-	public void unselectOtherInputs(InputBox ibb) {
-		for(InputBox ib : inputs)
-			if(ib != ibb) ib.selectedId = -1;
+	public void unselectOtherInputs(Component cc) {
+		for(Component c : components)
+			if(c instanceof InputBox)
+				if(c != cc) c.selectedId = -1;
 	}
 	
 	/**
@@ -306,18 +344,20 @@ public class Send extends BaseGui {
 	 * @param ibb
 	 */
 	public void unselectAllInputs() {
-		for(InputBox ib : inputs)
-			ib.selectedId = -1;
+		for(Component c : components)
+			if(c instanceof InputBox)
+				c.selectedId = -1;
 	}
 	
 	/**
 	 * Reset all the fields on the form.
 	 */
 	public void resetForm() {
-		for(int i = 1; i < inputs.length; i++)
-			inputs[i].text = "";
+		for(Component c : components)
+			if(c instanceof InputBox)
+				c.text = "";
 		
-		inputs[3].text = "" + Constants.globalCache.walletFee;
+		getComponentByName("fee").text = "" + Constants.globalCache.walletFee;
 	}
 
 }

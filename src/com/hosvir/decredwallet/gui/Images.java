@@ -14,6 +14,7 @@ public class Images {
 	private static BufferedImage icon;
 	private static BufferedImage[] icons;
 	private static BufferedImage[] interfaces;
+	private static BufferedImage downArrow;
 
 	/**
 	 * Load the images.
@@ -22,6 +23,7 @@ public class Images {
 		icon = ImageUtils.loadBufferedImage("resources/icon.png");
 		icons = ImageUtils.splitImage(ImageUtils.loadBufferedImage("resources/navicons.png"), 7, 2);
 		interfaces = ImageUtils.splitImage(ImageUtils.loadBufferedImage("resources/interface.png"), 20, 1);
+		downArrow = ImageUtils.loadBufferedImage("resources/down-arrow.png");
 	}
 	
 	public static BufferedImage getIcon() {
@@ -34,6 +36,10 @@ public class Images {
 
 	public static BufferedImage[] getInterfaces() {
 		return interfaces;
+	}
+	
+	public static BufferedImage getDownArrow() {
+		return downArrow;
 	}
 
 

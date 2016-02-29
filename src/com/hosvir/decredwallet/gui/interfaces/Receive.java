@@ -7,9 +7,10 @@ import java.awt.Rectangle;
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Api;
 import com.hosvir.decredwallet.Constants;
-import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Button;
+import com.hosvir.decredwallet.gui.Dialog;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.Interface;
 import com.hosvir.decredwallet.gui.Main;
 
 /**
@@ -17,18 +18,22 @@ import com.hosvir.decredwallet.gui.Main;
  * @author Troy
  *
  */
-public class Receive extends BaseGui {
+public class Receive extends Interface {
 	private int headerThird;
-	private Button getnew;
 	private String newAddress;
 	private int newAddressId;
 	
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
-		getnew = new Button("Get new", Engine.getWidth() - 150, 200, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
+		
+		this.components.add(new Button("new", Constants.getNewButtonText, Engine.getWidth() - 150, 200, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Dialog("newaddr", Constants.newAddressMessage));
 	}
 
 	public void update(long delta) {
+		//Update
+		super.update(delta);
+		
 		if(!blockInput){
 			if(rectangles == null && Constants.accounts.size() > 0){
 				rectangles = new Rectangle[Constants.accounts.size()];
@@ -39,21 +44,23 @@ public class Receive extends BaseGui {
 							295,
 							60);
 				}
-			}
-			
-			super.update(delta);
+			}			
 			
 			//Get new address
-			getnew.update(delta);
-			if(getnew.containsMouse) Main.containsMouse = true;
+			if(getComponentByName("new").containsMouse) Main.containsMouse = true;
 			
-			if(getnew.selectedId == 0 ){
-				newAddress = Api.getNewAddress(Constants.accounts.get(selectedId).name);
+			if(getComponentByName("new").selectedId == 0 ){
+				newAddress = Api.getNewAddress(Constants.accounts.get(selectedId).name).trim();
 				Constants.setClipboardString(newAddress);
 				newAddressId = selectedId;
 				
 				//Release button
-				getnew.selectedId = -1;
+				getComponentByName("new").selectedId = -1;
+				
+				//Show dialog
+				this.blockInput = true;
+				Constants.navbar.blockInput = true;
+				getComponentByName("newaddr").selectedId = 0;
 			}
 			
 			//Rename account
@@ -129,7 +136,7 @@ public class Receive extends BaseGui {
 			//DCR and Balance
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.dcrFont);
-			g.drawString("DCR", Engine.getWidth() / 2, 100);
+			g.drawString(Constants.dcrLabel, Engine.getWidth() / 2, 100);
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
@@ -139,9 +146,9 @@ public class Receive extends BaseGui {
 			//Available, Pending and Locked
 			g.setColor(Constants.labelColor);
 			g.setFont(Constants.labelFont);
-			g.drawString("Available", Engine.getWidth() - (headerThird * 3), 125);
-			g.drawString("Pending", Engine.getWidth() - (headerThird * 2), 125);
-			g.drawString("Locked", Engine.getWidth() - (headerThird * 1), 125);
+			g.drawString(Constants.availableLabel, Engine.getWidth() - (headerThird * 3), 125);
+			g.drawString(Constants.pendingLabel, Engine.getWidth() - (headerThird * 2), 125);
+			g.drawString(Constants.lockedLabel, Engine.getWidth() - (headerThird * 1), 125);
 			
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);
@@ -190,8 +197,8 @@ public class Receive extends BaseGui {
 				g.drawString(Constants.accounts.get(selectedId).addresses[0], 340, 220);
 			
 			
-			//Draw button
-			getnew.render(g);
+			//Render
+			super.render(g);
 		}
 		
 		
@@ -200,8 +207,9 @@ public class Receive extends BaseGui {
 	public void resize() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
-		getnew.x = Engine.getWidth() - 150;
-		getnew.resize();
+		getComponentByName("new").x = Engine.getWidth() - 150;
+		getComponentByName("new").resize();
+		getComponentByName("newaddr").resize();
 	}
 
 	@Override
