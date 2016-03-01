@@ -151,6 +151,7 @@ public class Constants {
 	public static ArrayList<Account> accounts = new ArrayList<Account>();
 	public static ArrayList<BaseGui> guiInterfaces = new ArrayList<BaseGui>();
 	public static ArrayList<Contact> contacts = new ArrayList<Contact>();
+	public static ArrayList<String> langConfFiles = new ArrayList<String>();
 	public static Navbar navbar;
 	public static GlobalCache globalCache;
 	public static String accountToRename;
@@ -175,6 +176,9 @@ public class Constants {
 		allowedPasswordClasses.add("com.hosvir.decredwallet.DecredWallet");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.Api");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Send");
+		
+		langConfFiles.add("English.conf");
+		langConfFiles.add("Deutsch.conf");
 		
 		properties = new Properties();
 		
@@ -408,10 +412,10 @@ public class Constants {
 	 * Create default properties
 	 */
 	private static void createDefaultLanguages() {
-		for(File f : new File(Constants.class.getResource("/resources/lang").getFile()).listFiles()){
-			if(!new File(langFolder.getPath() + File.separator + f.getName()).exists()){
-				FileUtils.exportResource("/resources/lang/" + f.getName(), langFolder.getPath());
-				log("Added new Language file: " + f.getName());
+		for(String s : langConfFiles){
+			if(!new File(langFolder.getPath() + File.separator + s).exists()){
+				FileUtils.exportResource("/resources/lang/" + s, langFolder.getPath());
+				log("Added new Language file: " + s);
 			}	
 		}
 	}
