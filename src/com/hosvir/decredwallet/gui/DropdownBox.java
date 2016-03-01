@@ -136,6 +136,13 @@ public class DropdownBox extends Component implements KeyListener {
 		for(Rectangle r : rectangles){
 			r.x = x;
 			r.y = y;
+			r.width = width;
+			r.height = height;
+		}
+		
+		for(Rectangle r : itemRectangles){
+			r.width = width;
+			r.height = height;
 		}
 	}
 

@@ -35,7 +35,7 @@ public abstract class Interface extends BaseGui {
 	 */
 	public Component getComponentByName(String name) {
 		for(Component c : components)
-			if(c.name.startsWith(name))
+			if(c.name == name)
 				return c;
 		
 		return null;

@@ -3,6 +3,8 @@ package com.hosvir.decredwallet.gui.interfaces;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
@@ -17,14 +19,17 @@ import com.hosvir.decredwallet.gui.Main;
  * @author Troy
  *
  */
-public class Wallet extends Interface {
+public class Wallet extends Interface implements MouseWheelListener {
 	private int headerThird;
+	private int scrollOffset = 0;
 	private String[] dateString;
 	
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
 		this.components.add(new Button("add", Constants.addButtonText, 20, Engine.getHeight() - 80, 255, 35, Constants.flatBlue, Constants.flatBlueHover));
+		
+		Main.canvas.addMouseWheelListener(this);
 	}
 
 	public void update(long delta) {
@@ -75,6 +80,94 @@ public class Wallet extends Interface {
 
 	@Override
 	public void render(Graphics2D g) {
+		//Transactions
+		if(Constants.accounts.size() > 0 && selectedId == 0){
+			for(int i = 0; i < Constants.globalCache.transactions.size(); i++){
+				if(180 + i*70 - scrollOffset < Engine.getHeight() && 180 + i*70 - scrollOffset > 80){
+					g.drawImage(Images.getInterfaces()[6], 
+							310, 
+							180 + i*70 - scrollOffset, 
+							10,
+							50,
+							null);
+					
+					g.setColor(Color.WHITE);
+					g.fillRect(320, 
+							180 + i*70 - scrollOffset, 
+							Engine.getWidth() - 345,
+							45);
+					
+					g.drawImage(Images.getInterfaces()[7], 
+							Engine.getWidth() - 25, 
+							180 + i*70 - scrollOffset, 
+							10,
+							50,
+							null);
+					
+					g.drawImage(Images.getInterfaces()[19], 
+							315, 
+							180 + i*70 - scrollOffset + 41, 
+							Engine.getWidth() - 334,
+							50,
+							null);
+					
+					switch(Constants.globalCache.transactions.get(i).getValueByName("category")){
+					case "send":
+						g.setColor(Constants.flatRed);
+						break;
+					case "receive":
+						g.setColor(Constants.flatGreen);
+						break;
+					case "generate":
+						g.setColor(Constants.flatYellow);
+						break;
+					}
+					
+					g.fillRect(314, 
+							180 + i*70 - scrollOffset, 
+							5,
+							50);
+					
+					
+					//Draw date
+					dateString = Constants.getWalletDate(Long.parseLong(Constants.globalCache.transactions.get(i).getValueByName("timereceived"))).split(":");
+					g.setColor(Constants.walletBalanceColor);
+					g.setFont(Constants.walletBalanceFont);
+					g.drawString(dateString[0], 330, 212 + i*70 - scrollOffset);
+					
+					g.setColor(Constants.labelColor);
+					g.setFont(Constants.transactionFont);
+					g.drawString(dateString[1].replaceAll("!", ":"), 322, 226 + i*70 - scrollOffset);
+					
+					//Draw address
+					g.setColor(Constants.walletBalanceColor);
+					g.setFont(Constants.addressFont);
+					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("address"), 
+							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("address")) / 2)) / 2, 
+							204 + i*70 - scrollOffset);
+					
+					//Draw transaction
+					g.setColor(Constants.labelColor);
+					g.setFont(Constants.transactionFont);
+					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("txid"), 
+							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("txid")) / 2)) / 2, 
+							226 + i*70 - scrollOffset);
+					
+					//Draw amount
+					g.setColor(Constants.walletBalanceColor);
+					g.setFont(Constants.walletBalanceFont);
+					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "))), 212 + i*70 - scrollOffset);
+					
+					//Draw tx fee
+					if(Constants.globalCache.transactions.get(i).getValueByName("fee") != null){
+						g.setColor(Constants.labelColor);
+						g.setFont(Constants.transactionFont);
+						g.drawString(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "))), 226 + i*70 - scrollOffset);
+					}
+				}
+			}
+		}
+		
 		//Header
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 
@@ -155,95 +248,6 @@ public class Wallet extends Interface {
 			g.drawString(Constants.accounts.get(selectedId).balance, Engine.getWidth() - (headerThird * 3) + 30 - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).balance) / 2), 145);
 			g.drawString(Constants.accounts.get(selectedId).pendingBalance, Engine.getWidth() - (headerThird * 2) + 30 - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).pendingBalance) / 2), 145);
 			g.drawString(Constants.accounts.get(selectedId).lockedBalance, Engine.getWidth() - (headerThird * 1) + 30 - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).lockedBalance) / 2), 145);
-			
-			
-			//Transactions
-			if(selectedId == 0){
-			for(int i = 0; i < Constants.globalCache.transactions.size(); i++){
-				if(180 + i*70 < Engine.getHeight()){
-					g.drawImage(Images.getInterfaces()[6], 
-							310, 
-							180 + i*70, 
-							10,
-							50,
-							null);
-					
-					g.setColor(Color.WHITE);
-					g.fillRect(320, 
-							180 + i*70, 
-							Engine.getWidth() - 345,
-							45);
-					
-					g.drawImage(Images.getInterfaces()[7], 
-							Engine.getWidth() - 25, 
-							180 + i*70, 
-							10,
-							50,
-							null);
-					
-					g.drawImage(Images.getInterfaces()[19], 
-							315, 
-							180 + i*70 + 41, 
-							Engine.getWidth() - 334,
-							50,
-							null);
-					
-					switch(Constants.globalCache.transactions.get(i).getValueByName("category")){
-					case "send":
-						g.setColor(Constants.flatRed);
-						break;
-					case "receive":
-						g.setColor(Constants.flatGreen);
-						break;
-					case "generate":
-						g.setColor(Constants.flatYellow);
-						break;
-					}
-					
-					g.fillRect(314, 
-							180 + i*70, 
-							5,
-							50);
-					
-					
-					//Draw date
-					dateString = Constants.getWalletDate(Long.parseLong(Constants.globalCache.transactions.get(i).getValueByName("timereceived"))).split(":");
-					g.setColor(Constants.walletBalanceColor);
-					g.setFont(Constants.walletBalanceFont);
-					g.drawString(dateString[0], 330, 212 + i*70);
-					
-					g.setColor(Constants.labelColor);
-					g.setFont(Constants.transactionFont);
-					g.drawString(dateString[1].replaceAll("!", ":"), 322, 226 + i*70);
-					
-					//Draw address
-					g.setColor(Constants.walletBalanceColor);
-					g.setFont(Constants.addressFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("address"), 
-							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("address")) / 2)) / 2, 
-							204 + i*70);
-					
-					//Draw transaction
-					g.setColor(Constants.labelColor);
-					g.setFont(Constants.transactionFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("txid"), 
-							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("txid")) / 2)) / 2, 
-							226 + i*70);
-					
-					//Draw amount
-					g.setColor(Constants.walletBalanceColor);
-					g.setFont(Constants.walletBalanceFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "))), 212 + i*70);
-					
-					//Draw tx fee
-					if(Constants.globalCache.transactions.get(i).getValueByName("fee") != null){
-						g.setColor(Constants.labelColor);
-						g.setFont(Constants.transactionFont);
-						g.drawString(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "))), 226 + i*70);
-					}
-				}
-			}
-			}
 		}
 		
 		//Render
@@ -260,6 +264,20 @@ public class Wallet extends Interface {
 	@Override
 	public boolean isActive() {
 		return Constants.navbar.selectedId == 6;
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		if(isActive()){
+			if(e.getUnitsToScroll() > 0){
+				scrollOffset += Constants.scrollDistance;
+			}else{
+				scrollOffset -= Constants.scrollDistance;
+			}
+			
+			if(scrollOffset < 0) scrollOffset = 0;
+			if(scrollOffset > (Constants.globalCache.transactions.size()-1)*70) scrollOffset = (Constants.globalCache.transactions.size()-1)*70;
+		}
 	}
 
 }

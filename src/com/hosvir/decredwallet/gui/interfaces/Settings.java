@@ -136,6 +136,8 @@ public class Settings extends Interface {
 	public void resize() {
 		getComponentByName("langSelect").width = Engine.getWidth() - 295;
 		getComponentByName("langSelect").resize();
+		
+		super.resize();
 	}
 
 	@Override

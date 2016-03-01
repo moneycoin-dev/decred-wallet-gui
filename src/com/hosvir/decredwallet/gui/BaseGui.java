@@ -41,7 +41,7 @@ public abstract class BaseGui implements GuiInterface {
 			
 			if(rectangles != null)
 			for(int i = 0; i < rectangles.length; i++){
-				if(rectangles[i].contains(Mouse.point)){
+				if(rectangles[i] != null && rectangles[i].contains(Mouse.point)){
 					containsMouse = true;
 					hoverId = i;
 	

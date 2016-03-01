@@ -54,10 +54,8 @@ public class LocalCommand {
             }
 
             while((s = stdError.readLine()) != null) {     
-            	if(!s.contains("[sudo] password for")){
-	                sb.append(s);
-	                sb.append("\n");
-            	}
+            	sb.append(s);
+            	sb.append("\n");
             }
             
             stdInput.close();

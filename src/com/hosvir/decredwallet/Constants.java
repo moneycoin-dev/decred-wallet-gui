@@ -6,9 +6,11 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +20,7 @@ import com.deadendgine.utils.Random;
 import com.hosvir.decredwallet.gui.BaseGui;
 import com.hosvir.decredwallet.gui.Main;
 import com.hosvir.decredwallet.gui.interfaces.Navbar;
+import com.hosvir.decredwallet.utils.FileUtils;
 import com.hosvir.decredwallet.utils.FileWriter;
 import com.hosvir.decredwallet.utils.JsonObject;
 import com.hosvir.decredwallet.utils.JsonObjects;
@@ -75,43 +78,49 @@ public class Constants {
 	public static String langFile;
 	
 	
-	public static String windowTitle;
-	public static String dcrLabel;
-	public static String availableLabel;
-	public static String pendingLabel;
-	public static String lockedLabel;
-	public static String fromLabel;
-	public static String toLabel;
-	public static String commentLabel;
-	public static String feeLabel;
-	public static String amountLabel;
-	public static String languageLabel;
+	public static String windowTitle = "Missing lang conf";
+	public static String dcrLabel = "Missing lang conf";
+	public static String availableLabel = "Missing lang conf";
+	public static String pendingLabel = "Missing lang conf";
+	public static String lockedLabel = "Missing lang conf";
+	public static String fromLabel = "Missing lang conf";
+	public static String toLabel = "Missing lang conf";
+	public static String commentLabel = "Missing lang conf";
+	public static String feeLabel = "Missing lang conf";
+	public static String amountLabel = "Missing lang conf";
+	public static String languageLabel = "Missing lang conf";
+	public static String nameLabel = "Missing lang conf";
+	public static String emailLabel = "Missing lang conf";
+	public static String addressLabel = "Missing lang conf";
 	
-	public static String addButtonText;
-	public static String cancelButtonText;
-	public static String confirmButtonText;
-	public static String okButtonText;
-	public static String getNewButtonText;
-	public static String sendButtonText;
-	public static String daemonButtonText;
-	public static String walletButtonText;
-	public static String guiButtonText;
-	public static String mainButtonText;
-	public static String securityButtonText;
-	public static String networkButtonText;
+	public static String addButtonText = "Missing lang conf";
+	public static String cancelButtonText = "Missing lang conf";
+	public static String confirmButtonText = "Missing lang conf";
+	public static String okButtonText = "Missing lang conf";
+	public static String getNewButtonText = "Missing lang conf";
+	public static String sendButtonText = "Missing lang conf";
+	public static String daemonButtonText = "Missing lang conf";
+	public static String walletButtonText = "Missing lang conf";
+	public static String guiButtonText = "Missing lang conf";
+	public static String mainButtonText = "Missing lang conf";
+	public static String securityButtonText = "Missing lang conf";
+	public static String networkButtonText = "Missing lang conf";
 	
-	public static String addAccountMessage;
-	public static String renameAccountMessage;
-	public static String enterPassphraseMessage;
-	public static String newAddressMessage;
+	public static String addAccountMessage = "Missing lang conf";
+	public static String renameAccountMessage = "Missing lang conf";
+	public static String enterPassphraseMessage = "Missing lang conf";
+	public static String newAddressMessage = "Missing lang conf";
+	public static String addContactMessage = "Missing lang conf";
+	public static String clipboardMessage = "Missing lang conf";
 	
-	public static String insufficientFundsError;
+	public static String insufficientFundsError = "Missing lang conf";
 	
+	private static Properties properties;
 	
-	
-	public static int doubleClickDelay;
-	public static int fpsMax;
-	public static int fpsMin;
+	public static int doubleClickDelay = 400;
+	public static int scrollDistance = 30;
+	public static int fpsMax = 30;
+	public static int fpsMin = 1;
 	
 	public static Color transparentBlack;
 	public static Color walletNameColor;
@@ -141,6 +150,7 @@ public class Constants {
 	public static ArrayList<String> guiLog = new ArrayList<String>();
 	public static ArrayList<Account> accounts = new ArrayList<Account>();
 	public static ArrayList<BaseGui> guiInterfaces = new ArrayList<BaseGui>();
+	public static ArrayList<Contact> contacts = new ArrayList<Contact>();
 	public static Navbar navbar;
 	public static GlobalCache globalCache;
 	public static String accountToRename;
@@ -150,8 +160,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.2-beta";
-		buildDate = "28/02/2016";
+		version = "0.0.3-beta";
+		buildDate = "01/03/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -166,8 +176,10 @@ public class Constants {
 		allowedPasswordClasses.add("com.hosvir.decredwallet.Api");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Send");
 		
+		properties = new Properties();
+		
 		//Create required folders
-		if(!langFolder.exists()) createDefaultLanguages();
+		createDefaultLanguages();
 		
 		//Get lang files
 		for(File f : langFolder.listFiles()){
@@ -175,7 +187,22 @@ public class Constants {
 		}
 		
 		//Create default settings
-		if(!settingsFile.exists()) createDefaultProperties();
+		if(!settingsFile.exists()) {
+			createDefaultProperties();
+		}else{
+			try{
+				properties.load(new FileInputStream(new File(userHome + ".version.conf")));
+				String fileVersion = properties.getProperty("Version");
+				
+				if(!fileVersion.startsWith(version)){
+					log("Version mismatch, GUI: " + version + ", File: " + fileVersion);
+					updateConfFiles();
+				}
+			}catch(Exception e){
+				log("Missing version file, it is recommended that you delete your settings.conf and allow the program to create a new settings file for you.");
+				FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
+			}
+		}
 		
 		
 		//OS is Windows... poor fella
@@ -196,7 +223,6 @@ public class Constants {
 		}
 		
 		try{
-			Properties properties = new Properties();
 			properties.load(new FileInputStream(settingsFile));
 			
 			decredLocation = properties.getProperty("Decred-Location");
@@ -208,6 +234,7 @@ public class Constants {
 			enableFps = Boolean.valueOf(properties.getProperty("Enable-FPS"));
 			langFile = properties.getProperty("Language");
 			doubleClickDelay = Integer.valueOf(properties.getProperty("Double-Click-Delay"));
+			scrollDistance = Integer.valueOf(properties.getProperty("Scroll-Distance"));
 			fpsMax = Integer.valueOf(properties.getProperty("FPS-Max"));
 			fpsMin = Integer.valueOf(properties.getProperty("FPS-Min"));
 			
@@ -276,6 +303,27 @@ public class Constants {
 		
 		//Load language
 		reloadLanguage();
+		
+		//Load contacts
+		try{
+			BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(userHome + "contacts.data")));
+			String line = "";
+			String[] splitLine;
+			int count = 0;
+
+			while((line = input.readLine()) != null){
+				if(line.length() > 3){
+					splitLine = line.split(":");
+					contacts.add(new Contact(count, splitLine[0], splitLine[1], splitLine[2]));
+					
+					count++;
+				}
+			}
+			
+			input.close();
+		}catch(Exception e){
+			//No contacts file
+		}
 	}
 	
 	/**
@@ -283,7 +331,6 @@ public class Constants {
 	 */
 	public static void reloadLanguage() {
 		try{
-			Properties properties = new Properties();
 			properties.load(new FileInputStream(new File(langFolder + File.separator + langFile + ".conf")));
 			
 			windowTitle = properties.getProperty("Window-Title");
@@ -297,6 +344,9 @@ public class Constants {
 			feeLabel = properties.getProperty("Fee-Label");
 			amountLabel = properties.getProperty("Amount-Label");
 			languageLabel = properties.getProperty("Language-Label");
+			nameLabel = properties.getProperty("Name-Label");
+			emailLabel = properties.getProperty("Email-Label");
+			addressLabel = properties.getProperty("Address-Label");
 			
 			addButtonText = properties.getProperty("Add-Button-Text");
 			cancelButtonText = properties.getProperty("Cancel-Button-Text");
@@ -315,6 +365,8 @@ public class Constants {
 			renameAccountMessage = properties.getProperty("Rename-Account-Message");
 			enterPassphraseMessage = properties.getProperty("Enter-Passphrase-Message");
 			newAddressMessage = properties.getProperty("New-Address-Message");
+			addContactMessage = properties.getProperty("Add-Contact-Message");
+			clipboardMessage = properties.getProperty("Clipboard-Mesage");
 			
 			insufficientFundsError = properties.getProperty("Insufficient-Funds-Error");
 		}catch(Exception e){
@@ -337,12 +389,16 @@ public class Constants {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#GUI settings", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Language=English", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Double-Click-Delay=400", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Scroll-Distance=30", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Display settings", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=true", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-FPS=false", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Max=30", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=1", true, true);
+		
+		//Create version file
+		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
 	
 		log("Default properties file has been created, edit preferences.conf and then restart the program.");
 		System.exit(0);
@@ -351,87 +407,20 @@ public class Constants {
 	/**
 	 * Create default properties
 	 */
-	private static void createDefaultLanguages(){
-		//Would prefer for download these files but people may see an outgoing connection as suspicious...
-		//Perhaps the lang files can be wrapped in an installer...
-		
-		//English
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "#Language variables", false, false);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Window-Title=Decred Wallet", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "#Labels", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "DCR-Label=DCR", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Available-Label=Available", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Pending-Label=Pending", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Locked-Label=Locked", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "From-Label=From", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "To-Label=To", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Comment-Label=Comment", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Fee-Label=Fee", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Amount-Label=Amount", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Language-Label=Language", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "#Buttons", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Add-Button-Text=Add", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Cancel-Button-Text=Cancel", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Confirm-Button-Text=Confirmd", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Ok-Button-Text=Ok", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Get-New-Button-Text=Get new", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Send-Button-Text=Send", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Daemon-Button-Text=DAEMON", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Wallet-Button-Text=WALLET", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "GUI-Button-Text=GUI", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Main-Button-Text=MAIN", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Security-Button-Text=SECURITY", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Network-Button-Text=NETWORK", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "#Messages", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Add-Account-Message=New account name and password", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Rename-Account-Message=Rename account", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Enter-Passphrase-Message=Enter your passphrase to continue", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "New-Address-Message=Your new address has been copied to the clipboard.", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "#Errors", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "English.conf", "Insufficient-Funds-Error=Insufficient funds.", true, true);
-		
-		//Deutsch
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "#Sprache Variablen", false, false);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Window-Title=Decred Brieftasche", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "#Labels", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "DCR-Label=DCR", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Available-Label=verfügbar", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Pending-Label=anstehend", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Locked-Label=verschlossen", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "From-Label=von", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "To-Label=zu", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Comment-Label=Kommentar", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Fee-Label=Gebühr", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Amount-Label=Betrag", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Language-Label=Sprache", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "#Buttons", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Add-Button-Text=hinzufügen", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Cancel-Button-Text=Stornieren", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Confirm-Button-Text=Bestätigen", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Ok-Button-Text=Ok", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Get-New-Button-Text=neue", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Send-Button-Text=Senden", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Daemon-Button-Text=DAEMON", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Wallet-Button-Text=Brieftasche", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "GUI-Button-Text=GUI", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Main-Button-Text=Haupt-", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Security-Button-Text=Sicherheit", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Network-Button-Text=Netzwerk", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "#Nachrichten", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Add-Account-Message=New Account-Namen und das Passwort", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Rename-Account-Message=Benennen Sie Konto", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Enter-Passphrase-Message=Geben Sie Ihr Passwort, um fortzufahren", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "New-Address-Message=Ihre neue Adresse wurde in die Zwischenablage kopiert.", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "#Fehler", true, true);
-		FileWriter.writeToFile(langFolder.getAbsolutePath() + File.separator + "Deutsch.conf", "Insufficient-Funds-Error=Unzureichende Mittel.", true, true);
+	private static void createDefaultLanguages() {
+		for(File f : new File(Constants.class.getResource("/resources/lang").getFile()).listFiles()){
+			if(!new File(langFolder.getPath() + File.separator + f.getName()).exists()){
+				FileUtils.exportResource("/resources/lang/" + f.getName(), langFolder.getPath());
+				log("Added new Language file: " + f.getName());
+			}	
+		}
+	}
+	
+	/**
+	 * Update the conf files.
+	 */
+	public static void updateConfFiles() {
+		//Add any new changes to conf files here after the first release.
 	}
 	
 	/**
@@ -477,6 +466,37 @@ public class Constants {
 		date = new Date();
 		date.setTime(timestamp*1000);
 		return wsdf.format(date);
+	}
+	
+	/**
+	 * Add new contact
+	 * 
+	 * @param c
+	 */
+	public synchronized static void addContact(Contact c) {
+		contacts.add(c);
+		saveContacts();
+	}
+	
+	/**
+	 * Remove a contact 
+	 * 
+	 * @param c
+	 */
+	public synchronized static void removeContact(Contact c) {
+		contacts.remove(c);
+		saveContacts();
+	}
+	
+	/**
+	 * Save contacts to file
+	 */
+	public synchronized static void saveContacts() {
+		FileWriter.writeToFile(userHome + "contacts.data", "", false, false);
+		
+		for(Contact c : contacts){
+			FileWriter.writeToFile(userHome + "contacts.data", c.getName() + ":" + c.getEmail() + ":" + c.getAddress(), true, true);
+		}
 	}
 	
 	/**
