@@ -34,7 +34,7 @@ public class LocalCommand {
 		sb.delete(0, sb.length());
         
         try {
-        	if(command.contains("dcrctl")) Constants.guiLog.add(command.replaceAll("-u '(.*?)'", "-u '***'").replaceAll("-P '(.*?)'", "-P '***'"));
+        	if(command.contains("dcrctl")) Constants.logWithoutSystem(command.replaceAll("-u '(.*?)'", "-u '***'").replaceAll("-P '(.*?)'", "-P '***'").replaceAll("--walletpass '(.*?)'", "--walletpass '***'").replaceAll("walletpassphrase '(.*?)'", "walletpassphrase '***'"));
         	
         	if(Constants.getOS().contains("Linux")){
         		commands = new String[]{"/bin/sh","-c", command};

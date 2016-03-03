@@ -1,5 +1,5 @@
 # decred-wallet
-Decred Wallet UI.
+Decred Wallet GUI.
 
 ###### Features
 * Multithreaded

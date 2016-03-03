@@ -54,7 +54,7 @@ public class LocalProcess extends Thread {
 				
 				//Save output
 				log.add(line);
-				if(Constants.guiInterfaces.size() > 5) Constants.guiInterfaces.get(5).resize();
+				if(Constants.guiInterfaces != null && Constants.guiInterfaces.size() > 5) Constants.guiInterfaces.get(5).resize();
 	
 				try {
 					Thread.sleep(50);

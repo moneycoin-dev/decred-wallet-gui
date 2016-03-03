@@ -213,16 +213,17 @@ public class Main extends BaseGame {
 
 
 	@Override
-	public void update(long delta) {
+	public synchronized void update(long delta) {
 		containsMouse = false;
 		
-		/*if(!canvas.hasFocus() && UPDATE_RATE != Constants.fpsMin){
+		//Adjust FPS to reduce load when not in use
+		if(!canvas.hasFocus() && UPDATE_RATE != Constants.fpsMin){
 			UPDATE_RATE = Constants.fpsMin;
 			UPDATE_PERIOD = 1000L / UPDATE_RATE;
 		}else if(UPDATE_RATE != Constants.fpsMax) {
 			UPDATE_RATE = Constants.fpsMax;
 			UPDATE_PERIOD = 1000L / UPDATE_RATE;
-		}*/
+		}
 		
 		
 		
@@ -244,6 +245,9 @@ public class Main extends BaseGame {
 				for(JsonObject jo : Api.getAccounts())
 					for(JsonObjects jos : jo.getJsonObjects())
 						Constants.accounts.add(new Account(jos.getName()));
+				
+				Constants.globalCache.forceUpdateInfo = true;
+				Constants.globalCache.forceUpdatePeers = true;
 			}
 			
 			//Update nav
@@ -264,6 +268,19 @@ public class Main extends BaseGame {
 				Main.frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}else{
 				Main.frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			}
+			
+			
+			//Cleanup logs, one log per update
+			if(Constants.guiLog.size() > Constants.maxLogLines) {
+				for(int i = 0; i < 100; i++)
+					Constants.guiLog.remove(i);
+			}else if(Constants.getDaemonProcess().log.size() > Constants.maxLogLines) {
+				for(int i = 0; i < 100; i++)
+					Constants.guiLog.remove(i);
+			}else if(Constants.getWalletProcess().log.size() > Constants.maxLogLines) {
+				for(int i = 0; i < 100; i++)
+					Constants.guiLog.remove(i);
 			}
 		}
 	}

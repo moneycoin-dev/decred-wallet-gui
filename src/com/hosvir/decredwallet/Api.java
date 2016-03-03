@@ -14,6 +14,14 @@ import com.hosvir.decredwallet.utils.JsonObject;
 public class Api {
 	private static LocalCommand command = new LocalCommand();
 	
+	public synchronized static ArrayList<JsonObject> getInfo() {
+		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " getinfo"));
+	}
+	
+	public synchronized static ArrayList<JsonObject> getPeerInfo() {
+		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " getpeerinfo"));
+	}
+	
 	public synchronized static String getBalance(String name) {
 		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getbalance '" + name + "' 0 spendable");
 	}
@@ -50,7 +58,7 @@ public class Api {
 		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getnewaddress '" + name + "'");
 	}
 	
-	public synchronized static void unlockWallet(int timeout) {
+	public synchronized static void unlockWallet(String timeout) {
 		command.execute(Constants.getDcrctlBaseCommand() + " --wallet walletpassphrase '" + Constants.getPrivatePassPhrase() + "' " + timeout);
 		Constants.setPrivatePassPhrase(null);
 	}
@@ -63,12 +71,24 @@ public class Api {
 		command.execute(Constants.getDcrctlBaseCommand() + " --wallet createnewaccount '" + name + "'");
 	}
 	
+	public synchronized static ArrayList<JsonObject> getStakeInfo() {
+		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getstakeinfo"));
+	}
+	
+	public synchronized static void disconnectPeer(String id) {
+		command.execute(Constants.getDcrctlBaseCommand() + " node disconnect " + id + " temp");
+	}
+	
 	public synchronized static boolean setTxFee(String fee) {
 		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet settxfee " + fee).startsWith("true");
 	}
 
 	public synchronized static String sendFrom(String name, String toAddress, String comment, String amount) {
 		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet sendfrom '" + name + "' " + toAddress + " " + amount);
+	}
+	
+	public synchronized static String purchaseTicket(String name, String spendLimit, String address) {
+		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet purchaseticket '" + name + "' " + spendLimit + " 1 '" + address + "'");
 	}
 
 }

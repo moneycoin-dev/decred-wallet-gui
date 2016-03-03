@@ -5,6 +5,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * 
+ * @author Troy
+ *
+ */
 public class FileUtils {
 	private static InputStream stream = null;
 	private static OutputStream resStreamOut = null;

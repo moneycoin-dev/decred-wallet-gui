@@ -98,7 +98,7 @@ public class Send extends Interface {
 				}
 				
 				if(readyToSend){
-					Api.unlockWallet(30);
+					Api.unlockWallet("30");
 					
 					String txId = Api.sendFrom(getComponentByName("from").text, 
 							getComponentByName("to").text, 

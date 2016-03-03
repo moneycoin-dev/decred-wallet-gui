@@ -14,11 +14,23 @@ import com.hosvir.decredwallet.utils.JsonObject;
 public class GlobalCache extends Thread implements Updatable {
 	private boolean running;
 	public boolean forceUpdate;
+	public boolean forceUpdateInfo;
+	public boolean forceUpdatePeers;
 	private Timer updateTimer = new Timer(1000);
-	public String walletFee = "0.05";
-	public ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
+	private Timer infoTimer = new Timer(1000);
+	private Timer peerTimer = new Timer(1000);
+	public String walletFee = "0.00";
+	public ArrayList<JsonObject> transactions;
+	public ArrayList<JsonObject> info;
+	public ArrayList<JsonObject> stakeInfo;
+	public ArrayList<JsonObject> peers;
 	
 	public GlobalCache() {
+		transactions = new ArrayList<JsonObject>();
+		info = new ArrayList<JsonObject>();
+		stakeInfo = new ArrayList<JsonObject>();
+		peers = new ArrayList<JsonObject>();
+		
 		this.setName("Decred Wallet - Cache Thread");
 		this.setPriority(NORM_PRIORITY);
 		this.start();
@@ -45,9 +57,30 @@ public class GlobalCache extends Thread implements Updatable {
 			walletFee = Api.getWalletFee();
 			transactions = Api.getTransactions(null);
 			
-			if(updateTimer.timeLimit <= 180000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
+			
+			if(updateTimer.timeLimit <= 100000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
 			updateTimer.reset();
 			forceUpdate = false;
+		}
+		
+		//Info update
+		if(infoTimer.isUp() || forceUpdateInfo){
+			info = Api.getInfo();
+			stakeInfo = Api.getStakeInfo();
+					
+			if(infoTimer.timeLimit <= 10000) infoTimer.timeLimit = Constants.getRandomNumber(10000, 45000);
+			infoTimer.reset();
+			forceUpdateInfo = false;
+		}
+		
+		//Peer update
+		if(peerTimer.isUp() || forceUpdatePeers){
+			peers = Api.getPeerInfo();
+			Constants.guiInterfaces.get(6).resize();
+			
+			if(peerTimer.timeLimit <= 10000) peerTimer.timeLimit = Constants.getRandomNumber(10000, 45000);
+			peerTimer.reset();
+			forceUpdatePeers = false;
 		}
 	}
 	

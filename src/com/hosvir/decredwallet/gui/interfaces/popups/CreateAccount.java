@@ -53,7 +53,7 @@ public class CreateAccount extends Interface {
 						break;
 					case "confirm":
 						Constants.setPrivatePassPhrase(getComponentByName("passphrase").text);
-						Api.unlockWallet(30);
+						Api.unlockWallet("30");
 						Api.createNewAccount(getComponentByName("account").text);
 						Constants.reloadAccounts();
 						Constants.blockInterfaces(false, this);

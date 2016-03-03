@@ -3,21 +3,27 @@ package com.hosvir.decredwallet.gui.interfaces;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import com.deadendgine.Engine;
 import com.hosvir.decredwallet.Constants;
 import com.hosvir.decredwallet.gui.Images;
 import com.hosvir.decredwallet.gui.Interface;
+import com.hosvir.decredwallet.gui.Main;
 
 /**
  * 
  * @author Troy
  *
  */
-public class Logs extends Interface {	
+public class Logs extends Interface implements MouseWheelListener {	
 	private int daemonStartLine = 0;
 	private int walletStartLine = 0;
 	private int guiStartLine = 0;
+	private int daemonEndLine = 27;
+	private int walletEndLine = 27;
+	private int guiEndLine = 27;
 	private int maxLines = 27;
 	
 	public void init() {
@@ -27,6 +33,8 @@ public class Logs extends Interface {
 		}
 		
 		maxLines = (Engine.getHeight() - 220) / 18;
+		
+		Main.canvas.addMouseWheelListener(this);
 	}
 	
 	@Override
@@ -104,18 +112,22 @@ public class Logs extends Interface {
 		if(daemonStartLine > -1){
 			switch(selectedId){
 			case 0:
-				for(int i = daemonStartLine; i < Constants.getDaemonProcess().log.size(); i++){
-					g.drawString(Constants.getDaemonProcess().log.get(i), 40, 175 + (i - daemonStartLine)*18);
+				if(Constants.getDaemonProcess() != null && Constants.getDaemonProcess().log != null)
+				for(int i = daemonStartLine; i < daemonEndLine; i++){
+					if(i < Constants.getDaemonProcess().log.size())
+						g.drawString(Constants.getDaemonProcess().log.get(i), 40, 175 + (i - daemonStartLine)*18);
 				}
 				break;
 			case 1:
-				for(int i = walletStartLine; i < Constants.getWalletProcess().log.size(); i++){
-					g.drawString(Constants.getWalletProcess().log.get(i), 40, 175 + (i - walletStartLine)*18);
+				for(int i = walletStartLine; i < walletEndLine; i++){
+					if(i < Constants.getWalletProcess().log.size())
+						g.drawString(Constants.getWalletProcess().log.get(i), 40, 175 + (i - walletStartLine)*18);
 				}
 				break;
 			case 2:
-				for(int i = guiStartLine; i < Constants.guiLog.size(); i++){
-					g.drawString(Constants.guiLog.get(i), 40, 175 + (i - guiStartLine)*18);
+				for(int i = guiStartLine; i < guiEndLine; i++){
+					if(i < Constants.guiLog.size())
+						g.drawString(Constants.guiLog.get(i), 40, 175 + (i - guiStartLine)*18);
 				}
 				break;
 			}
@@ -126,19 +138,71 @@ public class Logs extends Interface {
 	public void resize() {
 		if(Constants.getDaemonProcess() != null && Constants.getWalletProcess() != null){
 			maxLines = (Engine.getHeight() - 220) / 18;
+			
 			daemonStartLine = Constants.getDaemonProcess().log.size() - maxLines;
 			walletStartLine = Constants.getWalletProcess().log.size() - maxLines;
 			guiStartLine = Constants.guiLog.size() - maxLines;
+			daemonEndLine = daemonStartLine + maxLines;
+			walletEndLine = walletStartLine + maxLines;
+			guiEndLine = guiStartLine + maxLines;
 			
 			if(daemonStartLine < 0) daemonStartLine = 0;
 			if(walletStartLine < 0) walletStartLine = 0;
 			if(guiStartLine < 0) guiStartLine = 0;
+			if(daemonEndLine > Constants.getDaemonProcess().log.size() | daemonEndLine < maxLines) daemonEndLine = Constants.getDaemonProcess().log.size();
+			if(walletEndLine > Constants.getWalletProcess().log.size() | walletEndLine < maxLines) walletEndLine = Constants.getWalletProcess().log.size();
+			if(guiEndLine > Constants.guiLog.size() | guiEndLine < maxLines) guiEndLine = Constants.guiLog.size();
 		}
 	}
 
 	@Override
 	public boolean isActive() {
 		return Constants.navbar.selectedId == 1;
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		if(isActive()){
+			switch(selectedId){
+			case 0:
+				if(e.getUnitsToScroll() > 0){
+					daemonStartLine += e.getScrollAmount();
+				}else{
+					daemonStartLine -= e.getScrollAmount();
+				}
+				
+				if(daemonStartLine > Constants.getDaemonProcess().log.size()) daemonStartLine = Constants.getDaemonProcess().log.size()-1;
+				if(daemonStartLine < 0) daemonStartLine = 0;
+				daemonEndLine = daemonStartLine + maxLines;
+				if(daemonEndLine > Constants.getDaemonProcess().log.size()) daemonEndLine = Constants.getDaemonProcess().log.size();
+				break;
+			case 1:
+				if(e.getUnitsToScroll() > 0){
+					walletStartLine += e.getScrollAmount();
+				}else{
+					walletStartLine -= e.getScrollAmount();
+				}
+				
+				if(walletStartLine > Constants.getWalletProcess().log.size()) walletStartLine = Constants.getWalletProcess().log.size()-1;
+				if(walletStartLine < 0) walletStartLine = 0;
+				walletEndLine = walletStartLine + maxLines;
+				if(walletEndLine > Constants.getWalletProcess().log.size()) walletEndLine = Constants.getWalletProcess().log.size();
+				break;
+			case 2:
+				if(e.getUnitsToScroll() > 0){
+					guiStartLine += e.getScrollAmount();
+				}else{
+					guiStartLine -= e.getScrollAmount();
+				}
+				
+				if(guiStartLine > Constants.guiLog.size()) guiStartLine = Constants.guiLog.size()-1;
+				if(guiStartLine < 0) guiStartLine = 0;
+				guiEndLine = guiStartLine + maxLines;
+				if(guiEndLine > Constants.guiLog.size()) guiEndLine = Constants.guiLog.size();
+				break;
+
+			}
+		}
 	}
 
 }

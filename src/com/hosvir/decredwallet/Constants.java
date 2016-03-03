@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,6 +93,10 @@ public class Constants {
 	public static String nameLabel = "Missing lang conf";
 	public static String emailLabel = "Missing lang conf";
 	public static String addressLabel = "Missing lang conf";
+	public static String blocksLabel = "Missing lang conf";
+	public static String difficultyLabel = "Missing lang conf";
+	public static String peersLabel = "Missing lang conf";
+	public static String limitLabel = "Missing lang conf";
 	
 	public static String addButtonText = "Missing lang conf";
 	public static String cancelButtonText = "Missing lang conf";
@@ -119,6 +124,7 @@ public class Constants {
 	
 	public static int doubleClickDelay = 400;
 	public static int scrollDistance = 30;
+	public static int maxLogLines = 500;
 	public static int fpsMax = 30;
 	public static int fpsMin = 1;
 	
@@ -161,8 +167,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.3-beta";
-		buildDate = "01/03/2016";
+		version = "0.0.4-beta";
+		buildDate = "03/03/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -182,14 +188,6 @@ public class Constants {
 		
 		properties = new Properties();
 		
-		//Create required folders
-		createDefaultLanguages();
-		
-		//Get lang files
-		for(File f : langFolder.listFiles()){
-			langFiles.add(f.getName());
-		}
-		
 		//Create default settings
 		if(!settingsFile.exists()) {
 			createDefaultProperties();
@@ -207,7 +205,14 @@ public class Constants {
 				FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
 			}
 		}
+
+		//Create required folders
+		createDefaultLanguages();
 		
+		//Get lang files
+		for(File f : langFolder.listFiles()){
+			langFiles.add(f.getName());
+		}
 		
 		//OS is Windows... poor fella
 		if(getOS().contains("Windows")){
@@ -239,8 +244,16 @@ public class Constants {
 			langFile = properties.getProperty("Language");
 			doubleClickDelay = Integer.valueOf(properties.getProperty("Double-Click-Delay"));
 			scrollDistance = Integer.valueOf(properties.getProperty("Scroll-Distance"));
+			maxLogLines = Integer.valueOf(properties.getProperty("Max-Log-Lines"));
 			fpsMax = Integer.valueOf(properties.getProperty("FPS-Max"));
 			fpsMin = Integer.valueOf(properties.getProperty("FPS-Min"));
+			
+			if(!decredLocation.endsWith(File.separator)) decredLocation += File.separator;
+			
+			if(!new File(decredLocation).exists()){
+				log("Decred Location: '" + decredLocation + "' does not exist, update settings.conf");
+				System.exit(1);
+			}
 			
 			//Check for public pass
 			if(publicPassPhrase != ""){
@@ -351,6 +364,10 @@ public class Constants {
 			nameLabel = properties.getProperty("Name-Label");
 			emailLabel = properties.getProperty("Email-Label");
 			addressLabel = properties.getProperty("Address-Label");
+			blocksLabel = properties.getProperty("Blocks-Label");
+			difficultyLabel = properties.getProperty("Difficulty-Label");
+			peersLabel = properties.getProperty("Peers-Label");
+			limitLabel = properties.getProperty("Limit-Label");
 			
 			addButtonText = properties.getProperty("Add-Button-Text");
 			cancelButtonText = properties.getProperty("Cancel-Button-Text");
@@ -384,7 +401,13 @@ public class Constants {
 	 */
 	private static void createDefaultProperties(){
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Decred settings", false, false);
-		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Decred-Location=/home/ubuntu/decred/", true, true);
+		
+		if(getOS().contains("Windows")){
+			FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Decred-Location=C:/users/user/decred/", true, true);
+		}else{
+			FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Decred-Location=/home/ubuntu/decred/", true, true);
+		}
+		
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Daemon-Username=username", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Daemon-Password=password", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Public-Password=", true, true);
@@ -394,6 +417,7 @@ public class Constants {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Language=English", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Double-Click-Delay=400", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Scroll-Distance=30", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Max-Log-Lines=500", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Display settings", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=true", true, true);
@@ -403,6 +427,9 @@ public class Constants {
 		
 		//Create version file
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
+		
+		//Create lang folder
+		langFolder.mkdir();
 	
 		log("Default properties file has been created, edit preferences.conf and then restart the program.");
 		System.exit(0);
@@ -425,6 +452,10 @@ public class Constants {
 	 */
 	public static void updateConfFiles() {
 		//Add any new changes to conf files here after the first release.
+		
+		
+		//Last, update version
+		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
 	}
 	
 	/**
@@ -434,6 +465,17 @@ public class Constants {
 	 */
 	public synchronized static void log(String message) {
 		System.out.println(getDate() + ": " + message);
+		guiLog.add(getDate() + ": " + message);
+		
+		if(guiInterfaces.size() > 5) guiInterfaces.get(5).resize();
+	}
+	
+	/**
+	 * Log a message
+	 * 
+	 * @param message
+	 */
+	public synchronized static void logWithoutSystem(String message) {
 		guiLog.add(getDate() + ": " + message);
 		
 		if(guiInterfaces.size() > 5) guiInterfaces.get(5).resize();
@@ -470,6 +512,41 @@ public class Constants {
 		date = new Date();
 		date.setTime(timestamp*1000);
 		return wsdf.format(date);
+	}
+	
+	/**
+	 * Format the timestamp into a date
+	 * 
+	 * @param timestamp
+	 * @return String
+	 */
+	public static String formatDate(Long timestamp){
+		date = new Date();
+		date.setTime(timestamp*1000);
+		return sdf.format(date);
+	}
+	
+	/**
+	 * Format the time into a readable string.
+	 * 
+	 * @param l
+	 * @return String
+	 */
+	public static String formatTime(long l){
+		DecimalFormat dec = new DecimalFormat("#.##");
+		String result = "";
+		
+		if(l > 1000 && l < 60000){ //Seconds
+			result += dec.format((double)l / 1000) + " Seconds";
+		}else if(l > 60000 && l < 3600000){ //Minutes
+			result += dec.format((double)l / 60000) + " Minutes";
+		}else if(l > 3600000){ //Hours
+			result += dec.format((double)l / 3600000) + " Hours";
+		}else{
+			result += dec.format((double) l) + " Milliseconds";
+		}
+		
+		return result;
 	}
 	
 	/**

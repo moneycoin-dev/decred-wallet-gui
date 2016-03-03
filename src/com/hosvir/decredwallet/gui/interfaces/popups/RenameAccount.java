@@ -51,6 +51,7 @@ public class RenameAccount extends Interface {
 						Constants.reloadAccounts();
 						Constants.blockInterfaces(false, this);
 						getComponentByName("account").text = "";
+						getComponentByName("account").selectedId = -1;
 						Constants.accountToRename = "";
 						this.selectedId = -1;
 						break;
