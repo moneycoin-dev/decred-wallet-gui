@@ -94,7 +94,7 @@ Building has been tested on Windows 7.
 * Run Launch4j
 * Set output path to Decred.exe
 * Set jar input to DecredWallet.jar
-* Set icon to resources/Decred.ico
+* Set icon to resources/decred.ico
 * Choose JRE tab
 * Min JRE = 1.7.0
 * Max JRE = 1.9.9
