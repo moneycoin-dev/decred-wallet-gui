@@ -31,8 +31,8 @@ public class AddContact extends Interface {
 		this.components.add(new InputBox("email", (Engine.getWidth() / 2) - 180,(Engine.getHeight() / 2) - 10,500,30));
 		this.components.add(new InputBox("address", (Engine.getWidth() / 2) - 180,(Engine.getHeight() / 2) + 30,500,30));
 		
-		this.components.add(new Button("cancel", Constants.cancelButtonText, 30, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 130, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("cancel", Constants.cancelButtonText, 30, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatRed, Constants.flatRedHover));
+		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 130, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 	}
 	
 	@Override
@@ -73,7 +73,7 @@ public class AddContact extends Interface {
 			
 			//Input boxes
 			if(c instanceof InputBox) {
-				if(c.clickCount > 0) unselectOtherInputs(c);
+				if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
 			}
 		}
 	}
@@ -130,28 +130,6 @@ public class AddContact extends Interface {
 		getComponentByName("address").resize();
 		getComponentByName("cancel").resize();
 		getComponentByName("confirm").resize();
-	}
-	
-	/**
-	 * Unselect the input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectOtherInputs(Component cc) {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				if(c != cc) c.selectedId = -1;
-	}
-	
-	/**
-	 * Unselect all input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectAllInputs() {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				c.selectedId = -1;
 	}
 	
 	/**

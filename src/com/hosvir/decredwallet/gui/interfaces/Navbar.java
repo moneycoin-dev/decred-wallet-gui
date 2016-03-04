@@ -16,6 +16,7 @@ import com.hosvir.decredwallet.gui.Images;
 public class Navbar extends BaseGui {
 	private int a;
 	
+	@Override
 	public void init(){
 		selectedId = 1;
 		

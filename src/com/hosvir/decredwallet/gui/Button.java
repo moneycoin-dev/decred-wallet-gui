@@ -50,6 +50,7 @@ public class Button extends Component {
 		g.drawString(text, x + (width / 2) - (g.getFontMetrics().stringWidth(text) / 2), y + (height / 2) + 8);
 	}
 	
+	@Override
 	public void resize() {
 		for(Rectangle r : rectangles){
 			r.x = x;

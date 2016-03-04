@@ -240,6 +240,16 @@ public class Main extends BaseGame {
 					loadingAnimationString += ".";
 				}
 			}
+			
+			Constants.guiInterfaces.get(5).update(delta);
+			if(Constants.guiInterfaces.get(5).containsMouse) containsMouse = true;
+			
+			//Restore cursor
+			if(!containsMouse){
+				Main.frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			}else{
+				Main.frame.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			}
 		}else{
 			if(Constants.accounts.size() == 0){
 				for(JsonObject jo : Api.getAccounts())
@@ -305,27 +315,25 @@ public class Main extends BaseGame {
 			}
 			
 			//Loading message
-			if(!Constants.isDaemonReady() || !Constants.isWalletReady()){				
-				g.setColor(Constants.transparentBlack);
+			if(!Constants.isDaemonReady() || !Constants.isWalletReady()){	
+				Constants.guiInterfaces.get(5).render(g);
+				
+				/*g.setColor(Constants.transparentBlack);
 				g.fillRect(0, 0, Engine.getWidth(), Engine.getHeight());
 				
 				g.setColor(Color.WHITE);
-				g.fillRect(0, (Engine.getHeight() / 2) - 100, Engine.getWidth(), 200);
+				g.fillRect(0, (Engine.getHeight() / 2) - 100, Engine.getWidth(), 200);*/
 				
-				g.setColor(Constants.walletNameColor);
+				g.setColor(Constants.flatRed);
 				g.setFont(Constants.dcrFont);
-				g.drawString("Loading" + loadingAnimationString, (Engine.getWidth() / 2) - 60, (Engine.getHeight() / 2));
+				g.drawString("Loading" + loadingAnimationString, (Engine.getWidth() / 2) - 60, 30);
 				
+				g.setFont(Constants.labelFont);
 				if(!Constants.isDaemonReady()){
-					g.setColor(Constants.labelColor);
-					g.setFont(Constants.labelFont);
-					g.drawString("Daemon starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Daemon starting") / 2), (Engine.getHeight() / 2) + 40);
+					g.drawString("Daemon starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Daemon starting") / 2), 50);
 				}else{
-					g.setColor(Constants.labelColor);
-					g.setFont(Constants.labelFont);
-					g.drawString("Wallet starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Wallet starting") / 2), (Engine.getHeight() / 2) + 40);
+					g.drawString("Wallet starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Wallet starting") / 2), 50);
 				}
-					
 			}
 			
 			break;

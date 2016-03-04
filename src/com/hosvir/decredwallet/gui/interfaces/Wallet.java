@@ -3,13 +3,16 @@ package com.hosvir.decredwallet.gui.interfaces;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import com.deadendgine.Engine;
+import com.deadendgine.input.Mouse;
 import com.hosvir.decredwallet.Constants;
 import com.hosvir.decredwallet.gui.Button;
 import com.hosvir.decredwallet.gui.Component;
+import com.hosvir.decredwallet.gui.Dialog;
 import com.hosvir.decredwallet.gui.Images;
 import com.hosvir.decredwallet.gui.Interface;
 import com.hosvir.decredwallet.gui.Main;
@@ -23,16 +26,29 @@ public class Wallet extends Interface implements MouseWheelListener {
 	private int headerThird;
 	private int scrollOffset = 0;
 	private String[] dateString;
+	private Rectangle[] txRectangles;
+	private int txHoverId = -1;
 	
+	@Override
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
 		this.components.add(new Button("add", Constants.addButtonText, 20, Engine.getHeight() - 80, 255, 35, Constants.flatBlue, Constants.flatBlueHover));
 		
+		Dialog errorDiag = new Dialog("errordiag", "");
+		errorDiag.width = 800;
+		errorDiag.resize();
+		this.components.add(errorDiag);
+		
 		Main.canvas.addMouseWheelListener(this);
 	}
 
+	@Override
 	public void update(long delta) {
+		getComponentByName("errordiag").width = 800;
+		//Allow diag closing
+		if(getComponentByName("errordiag").isActive()) getComponentByName("errordiag").update(delta);
+		
 		if(!blockInput){
 			if(rectangles == null && Constants.accounts.size() > 0){
 				rectangles = new Rectangle[Constants.accounts.size()];
@@ -74,6 +90,40 @@ public class Wallet extends Interface implements MouseWheelListener {
 				blockInput = true;
 				Constants.navbar.blockInput = true;
 				Constants.guiInterfaces.get(Constants.guiInterfaces.size() - 2).selectedId = 0;
+			}
+			
+			
+			
+			//Receive rectangles
+			if(txRectangles == null && Constants.globalCache.transactions.size() > 0){
+				txRectangles = new Rectangle[Constants.globalCache.transactions.size()];
+				
+				for(int i = 0; i < txRectangles.length; i++){
+					txRectangles[i] = new Rectangle((Engine.getWidth() / 2) - 150, 210 + i*70 - scrollOffset, 530,20);
+				}
+			}
+			
+			if(txRectangles != null){
+				for(int i = 0; i < txRectangles.length; i++){
+					if(txRectangles[i] != null && txRectangles[i].contains(Mouse.point)){
+						containsMouse = true;
+						txHoverId = i;
+		
+						if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
+							Constants.setClipboardString(Constants.globalCache.transactions.get(txHoverId).getValueByName("txid").trim());
+							getComponentByName("errordiag").text = Constants.clipboardMessage + ": " + Constants.getClipboardString();
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+							
+							Mouse.release(MouseEvent.BUTTON1);
+						}
+					}
+				}
+				
+				if(!containsMouse) txHoverId = -1;
 			}
 		}
 	}
@@ -147,7 +197,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 							204 + i*70 - scrollOffset);
 					
 					//Draw transaction
-					g.setColor(Constants.labelColor);
+					if(txHoverId == i) g.setColor(Constants.flatBlue); else g.setColor(Constants.labelColor);
 					g.setFont(Constants.transactionFont);
 					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("txid"), 
 							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("txid")) / 2)) / 2, 
@@ -254,11 +304,15 @@ public class Wallet extends Interface implements MouseWheelListener {
 		super.render(g);
 	}
 	
+	@Override
 	public void resize() {
+		txRectangles = null;
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
 		getComponentByName("add").y = Engine.getHeight() - 80;
 		getComponentByName("add").resize();
+		
+		super.resize();
 	}
 
 	@Override
@@ -277,6 +331,8 @@ public class Wallet extends Interface implements MouseWheelListener {
 			
 			if(scrollOffset < 0) scrollOffset = 0;
 			if(scrollOffset > (Constants.globalCache.transactions.size()-1)*70) scrollOffset = (Constants.globalCache.transactions.size()-1)*70;
+			
+			txRectangles = null;
 		}
 	}
 

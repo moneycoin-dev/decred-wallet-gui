@@ -58,9 +58,10 @@ public class Api {
 		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getnewaddress '" + name + "'");
 	}
 	
-	public synchronized static void unlockWallet(String timeout) {
-		command.execute(Constants.getDcrctlBaseCommand() + " --wallet walletpassphrase '" + Constants.getPrivatePassPhrase() + "' " + timeout);
+	public synchronized static String unlockWallet(String timeout) {
+		String result = command.execute(Constants.getDcrctlBaseCommand() + " --wallet walletpassphrase '" + Constants.getPrivatePassPhrase() + "' " + timeout);
 		Constants.setPrivatePassPhrase(null);
+		return result;
 	}
 	
 	public synchronized static void renameAccount(String old, String name) {

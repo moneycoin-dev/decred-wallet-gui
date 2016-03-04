@@ -25,6 +25,7 @@ public class Send extends Interface {
 	private int headerThird;
 	private boolean readyToSend;
 	
+	@Override
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
@@ -98,25 +99,41 @@ public class Send extends Interface {
 				}
 				
 				if(readyToSend){
-					Api.unlockWallet("30");
+					String unlock = Api.unlockWallet("30");
 					
-					String txId = Api.sendFrom(getComponentByName("from").text, 
-							getComponentByName("to").text, 
-							getComponentByName("comment").text, 
-							getComponentByName("amount").text);
-					
-					if(txId == ""){
-						Constants.log("Unable to send DCR. " + txId);
-					}else if(txId.contains("insufficient funds")){
-						Constants.log("Insufficient funds: " + txId);
-						getComponentByName("errordiag").text = Constants.insufficientFundsError;
+					if(unlock == null | unlock.trim().length() < 1){
+						String txId = Api.sendFrom(getComponentByName("from").text, 
+								getComponentByName("to").text, 
+								getComponentByName("comment").text, 
+								getComponentByName("amount").text);
+						
+						if(txId == ""){
+							Constants.log("Unable to send DCR. " + txId);
+						}else if(txId.contains("insufficient funds")){
+							Constants.log("Insufficient funds: " + txId);
+							getComponentByName("errordiag").text = Constants.insufficientFundsError;
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+						}else{
+							Constants.log("Sucess, transaction id: " + txId);
+							getComponentByName("errordiag").text = Constants.clipboardMessage + ": " + txId;
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+						}
+					}else{
+						Constants.log("Error: " + unlock);
+						getComponentByName("errordiag").text = Constants.error + " " + unlock;
 						
 						//Show dialog
 						this.blockInput = true;
 						Constants.navbar.blockInput = true;
 						getComponentByName("errordiag").selectedId = 0;
-					}else{
-						Constants.log("Sucess, transaction id: " + txId);
 					}
 				}else{
 					Constants.log("Unable to set Wallet fee, sending cancelled.");
@@ -147,7 +164,7 @@ public class Send extends Interface {
 						case "send":
 							blockInput = true;
 							Constants.navbar.blockInput = true;
-							unselectAllInputs();
+							Constants.unselectAllInputs(components);
 							Constants.guiInterfaces.get(Constants.guiInterfaces.size() -1).selectedId = 0;
 							break;
 						}			
@@ -159,7 +176,7 @@ public class Send extends Interface {
 				
 				//Input boxes
 				if(c instanceof InputBox) {
-					if(c.clickCount > 0) unselectOtherInputs(c);
+					if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
 				}
 			}
 		
@@ -325,28 +342,6 @@ public class Send extends Interface {
 	@Override
 	public boolean isActive() {
 		return Constants.navbar.selectedId == 3;
-	}
-	
-	/**
-	 * Unselect the input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectOtherInputs(Component cc) {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				if(c != cc) c.selectedId = -1;
-	}
-	
-	/**
-	 * Unselect all input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectAllInputs() {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				c.selectedId = -1;
 	}
 	
 	/**

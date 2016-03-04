@@ -71,7 +71,7 @@ public class CreateAccount extends Interface {
 			
 			//Input boxes
 			if(c instanceof InputBox) {
-				if(c.clickCount > 0) unselectOtherInputs(c);
+				if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
 			}
 		}
 	}
@@ -116,28 +116,6 @@ public class CreateAccount extends Interface {
 		
 		getComponentByName("cancel").resize();
 		getComponentByName("confirm").resize();
-	}
-	
-	/**
-	 * Unselect the input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectOtherInputs(Component cc) {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				if(c != cc) c.selectedId = -1;
-	}
-	
-	/**
-	 * Unselect all input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectAllInputs() {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				c.selectedId = -1;
 	}
 
 }

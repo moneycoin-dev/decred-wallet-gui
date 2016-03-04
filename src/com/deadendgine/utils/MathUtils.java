@@ -54,5 +54,20 @@ public class MathUtils {
 	public static int getPercent(double current, double max, int percentSize){
 		return (int) ((current / max) * percentSize);
 	}
+	
+	/**
+	 * Check if the String is numeric.
+	 * 
+	 * @param string
+	 * @return Boolean
+	 */
+	public static boolean isNumeric(String string) {
+		try {
+			int i = Integer.parseInt(string);
+			return true;
+		}catch(NumberFormatException e){
+			return false;
+		}
+	}
 
 }

@@ -12,7 +12,7 @@ All components are made using Graphics2D and images where required, this gives u
 ___
 
 #### Download binaries
-* [Release page](https://github.com/Fsig/decred-wallet/releases)
+* [Release page](https://github.com/Fsig/decred-wallet-gui/releases)
 
 ___
 
@@ -105,6 +105,7 @@ ___
 #### Help
 
 * [Support/Suggestions thread](https://forum.decred.org/threads/decred-wallet-gui.1119/)
+* [Email](mailto::fsig@hmamail.com)
 * [JDK Download](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [Set environment variable Windows](http://www.tutorialspoint.com/java/java_environment_setup.htm)
 

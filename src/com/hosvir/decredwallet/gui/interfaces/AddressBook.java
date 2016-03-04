@@ -23,6 +23,7 @@ import com.hosvir.decredwallet.gui.Main;
 public class AddressBook extends Interface implements MouseWheelListener {
 	private int scrollOffset = 0;
 	
+	@Override
 	public void init() {		
 		this.components.add(new Button("add", Constants.addButtonText,20,80,100,35,Constants.flatBlue,Constants.flatBlueHover));
 		this.components.add(new Dialog("clipboard", Constants.clipboardMessage));
@@ -49,8 +50,8 @@ public class AddressBook extends Interface implements MouseWheelListener {
 			}
 			
 			//Check for clicking on rectangle
-			if(clickCount > 0){				
-				if(selectedId > Constants.contacts.size()){
+			if(clickCount > 0){	
+				if(selectedId > Constants.contacts.size()-1){
 					if(selectedId < (Constants.contacts.size()*2)){
 						Constants.setClipboardString(Constants.contacts.get(selectedId - Constants.contacts.size()).getName());
 					}else if(selectedId < (Constants.contacts.size()*3)){
@@ -63,6 +64,7 @@ public class AddressBook extends Interface implements MouseWheelListener {
 					getComponentByName("clipboard").selectedId = 0;
 				}else{
 					Constants.removeContact(Constants.contacts.get(selectedId));
+					rectangles = null;
 				}
 				
 				clickCount = 0;

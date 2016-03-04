@@ -17,8 +17,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
+
 import com.deadendgine.utils.Random;
 import com.hosvir.decredwallet.gui.BaseGui;
+import com.hosvir.decredwallet.gui.Component;
+import com.hosvir.decredwallet.gui.InputBox;
 import com.hosvir.decredwallet.gui.Main;
 import com.hosvir.decredwallet.gui.interfaces.Navbar;
 import com.hosvir.decredwallet.utils.FileUtils;
@@ -90,6 +94,11 @@ public class Constants {
 	public static String feeLabel = "Missing lang conf";
 	public static String amountLabel = "Missing lang conf";
 	public static String languageLabel = "Missing lang conf";
+	public static String doubleClickDelayLabel = "Missing lang conf";
+	public static String scrollDistanceLabel = "Missing lang conf";
+	public static String maxLogLinesLabel = "Missing lang conf";
+	public static String fpsMaxLabel = "Missing lang conf";
+	public static String fpsMinLabel = "Missing lang conf";
 	public static String nameLabel = "Missing lang conf";
 	public static String emailLabel = "Missing lang conf";
 	public static String addressLabel = "Missing lang conf";
@@ -117,8 +126,11 @@ public class Constants {
 	public static String newAddressMessage = "Missing lang conf";
 	public static String addContactMessage = "Missing lang conf";
 	public static String clipboardMessage = "Missing lang conf";
+	public static String settingsSavedMessage = "Missing lang conf";
 	
 	public static String insufficientFundsError = "Missing lang conf";
+	public static String integerError = "Missing lang conf";
+	public static String error = "Missing lang conf";
 	
 	private static Properties properties;
 	
@@ -167,8 +179,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.4-beta";
-		buildDate = "03/03/2016";
+		version = "0.0.5-beta";
+		buildDate = "04/03/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -252,11 +264,18 @@ public class Constants {
 			
 			if(!new File(decredLocation).exists()){
 				log("Decred Location: '" + decredLocation + "' does not exist, update settings.conf");
+				
+				//Notify user about options as they may not have the process attached to a terminal to see output
+				JOptionPane.showMessageDialog(null, 
+						"Decred Location: '" + decredLocation + "' does not exist, update settings.conf",
+						"Decred Wallet",
+						JOptionPane.INFORMATION_MESSAGE);
+				
 				System.exit(1);
 			}
 			
 			//Check for public pass
-			if(publicPassPhrase != ""){
+			if(publicPassPhrase != null && publicPassPhrase.length() > 1){
 				requirePublicPass = true;
 				extraWalletArguments += " --walletpass '" + publicPassPhrase + "'";
 			}
@@ -361,6 +380,11 @@ public class Constants {
 			feeLabel = properties.getProperty("Fee-Label");
 			amountLabel = properties.getProperty("Amount-Label");
 			languageLabel = properties.getProperty("Language-Label");
+			doubleClickDelayLabel = properties.getProperty("Double-Click-Delay-Label");
+			scrollDistanceLabel = properties.getProperty("Scroll-Distance-Label");
+			maxLogLinesLabel = properties.getProperty("Max-Log-Lines-Label");
+			fpsMaxLabel = properties.getProperty("Fps-Max-Label");
+			fpsMinLabel = properties.getProperty("Fps-Min-Label");
 			nameLabel = properties.getProperty("Name-Label");
 			emailLabel = properties.getProperty("Email-Label");
 			addressLabel = properties.getProperty("Address-Label");
@@ -388,8 +412,11 @@ public class Constants {
 			newAddressMessage = properties.getProperty("New-Address-Message");
 			addContactMessage = properties.getProperty("Add-Contact-Message");
 			clipboardMessage = properties.getProperty("Clipboard-Mesage");
+			settingsSavedMessage = properties.getProperty("Settings-Saved-Mesage");
 			
 			insufficientFundsError = properties.getProperty("Insufficient-Funds-Error");
+			integerError = properties.getProperty("Integer-Error");
+			error = properties.getProperty("Error");
 		}catch(Exception e){
 			log("Error loading language.");
 			e.printStackTrace();
@@ -428,11 +455,22 @@ public class Constants {
 		//Create version file
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
 		
+		//Create contacts file
+		FileWriter.writeToFile(userHome + "contacts.data", "Donate:fsig@hmamail.com:DsmcWt82aeraJ22bayUtMXm8dyRL8bFnBVY", false, false);
+		
 		//Create lang folder
 		langFolder.mkdir();
 	
-		log("Default properties file has been created, edit preferences.conf and then restart the program.");
-		System.exit(0);
+		log("Default properties file has been created, edit settings.conf and then restart the program.");
+		
+		//Notify user about options as they may not have the process attached to a terminal to see output
+		JOptionPane.showMessageDialog(null, 
+				"Default properties file has been created, edit settings.conf and then restart the program.",
+				"Decred Wallet",
+				JOptionPane.INFORMATION_MESSAGE);
+		
+		//Exit
+		System.exit(1);
 	}
 	
 	/**
@@ -448,11 +486,44 @@ public class Constants {
 	}
 	
 	/**
+	 * Save the settings to file
+	 */
+	public static void saveSettings() {
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Decred settings", false, false);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Decred-Location=" + decredLocation, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Daemon-Username=" + daemonUsername, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Daemon-Password=" + daemonPassword, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Public-Password=" + publicPassPhrase, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Testnet=" + testnet, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#GUI settings", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Language=" + langFile, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Double-Click-Delay=" + doubleClickDelay, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Scroll-Distance=" + scrollDistance, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Max-Log-Lines=" + maxLogLines, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Display settings", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=" + enableOpenGL, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-FPS=" + enableFps, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Max=" + fpsMax, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=" + fpsMin, true, true);
+	}
+	
+	/**
 	 * Update the conf files.
 	 */
 	public static void updateConfFiles() {
 		//Add any new changes to conf files here after the first release.
-		
+		for(String s : langConfFiles){
+			File file = new File(langFolder.getPath() + File.separator + s);
+			if(file.exists()){
+				if(file.delete()){
+					log("Deleted outdated Language file: " + file.getName());
+				}else{
+					log("Failed to delete outdated Language file: " + file.getName());
+				}
+			}
+		}
 		
 		//Last, update version
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
@@ -479,6 +550,28 @@ public class Constants {
 		guiLog.add(getDate() + ": " + message);
 		
 		if(guiInterfaces.size() > 5) guiInterfaces.get(5).resize();
+	}
+	
+	/**
+	 * Unselect the input boxes.
+	 * 
+	 * @param ibb
+	 */
+	public static synchronized void unselectOtherInputs(ArrayList<Component> components, Component exclude) {
+		for(Component c : components)
+			if(c instanceof InputBox)
+				if(c != exclude) c.selectedId = -1;
+	}
+	
+	/**
+	 * Unselect all input boxes.
+	 * 
+	 * @param ibb
+	 */
+	public static synchronized void unselectAllInputs(ArrayList<Component> components) {
+		for(Component c : components)
+			if(c instanceof InputBox)
+				c.selectedId = -1;
 	}
 	
 	/**

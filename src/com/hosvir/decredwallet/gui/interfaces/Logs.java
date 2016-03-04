@@ -26,6 +26,7 @@ public class Logs extends Interface implements MouseWheelListener {
 	private int guiEndLine = 27;
 	private int maxLines = 27;
 	
+	@Override
 	public void init() {
 		rectangles = new Rectangle[3];
 		for(int i = 0; i < rectangles.length; i++){
@@ -119,6 +120,7 @@ public class Logs extends Interface implements MouseWheelListener {
 				}
 				break;
 			case 1:
+				if(Constants.getWalletProcess() != null)
 				for(int i = walletStartLine; i < walletEndLine; i++){
 					if(i < Constants.getWalletProcess().log.size())
 						g.drawString(Constants.getWalletProcess().log.get(i), 40, 175 + (i - walletStartLine)*18);

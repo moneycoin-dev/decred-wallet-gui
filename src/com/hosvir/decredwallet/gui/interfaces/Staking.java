@@ -23,6 +23,7 @@ import com.hosvir.decredwallet.gui.Main;
 public class Staking extends Interface {
 	private int headerThird;
 	
+	@Override
 	public void init() {
 		headerThird = Engine.getWidth() / 6;
 		
@@ -92,7 +93,7 @@ public class Staking extends Interface {
 			
 			//Input boxes
 			if(c instanceof InputBox) {
-				if(c.clickCount > 0) unselectOtherInputs(c);
+				if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
 			}
 		}
 	}
@@ -124,7 +125,7 @@ public class Staking extends Interface {
 		g.drawString("Missed", (headerThird * 5) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Missed") / 2), 90);
 		g.drawString("Revoked", (headerThird * 6) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Revoked") / 2), 90);
 		
-		if(Constants.globalCache.stakeInfo != null){
+		if(Constants.globalCache.stakeInfo != null && Constants.globalCache.stakeInfo.size() > 0){
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);
 			g.drawString(Constants.globalCache.stakeInfo.get(0).getValueByName("poolsize"), headerThird - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.stakeInfo.get(0).getValueByName("poolsize")) / 2), 110);
@@ -184,28 +185,6 @@ public class Staking extends Interface {
 	@Override
 	public boolean isActive() {
 		return Constants.navbar.selectedId == 4;
-	}
-	
-	/**
-	 * Unselect the input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectOtherInputs(Component cc) {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				if(c != cc) c.selectedId = -1;
-	}
-	
-	/**
-	 * Unselect all input boxes.
-	 * 
-	 * @param ibb
-	 */
-	public void unselectAllInputs() {
-		for(Component c : components)
-			if(c instanceof InputBox)
-				c.selectedId = -1;
 	}
 
 }

@@ -54,7 +54,7 @@ public class DecredWallet {
 		//Check to see if the daemon is ready
 		while(!Constants.isDaemonReady()){
 			for(String s : Constants.getDaemonProcess().log)
-				if(s.contains("RPC server listening on"))
+				if(s.contains("RPC server listening"))
 					Constants.setDaemonReady(true);
 				
 			//Sleep
@@ -69,10 +69,10 @@ public class DecredWallet {
 		//Check to see if the daemon is ready
 		while(!Constants.isWalletReady()){
 			for(String s : Constants.getWalletProcess().log)
-				if(s.contains("RPC server listening on"))
+				if(s.contains("RPC server listening"))
 					Constants.setWalletReady(true);
 				else if(s.contains("invalid passphrase for master public key"))
-					System.out.println("Need public key");
+					Constants.log("Need public key, edit settings.conf");
 				
 			//Sleep
 			sleep(100);

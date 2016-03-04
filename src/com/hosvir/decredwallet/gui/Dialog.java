@@ -28,7 +28,7 @@ public class Dialog extends Component {
 		this.textColor = Constants.walletBalanceColor;
 		this.selectedId = -1;
 		
-		this.okButton = new Button("ok", "Ok", (Engine.getWidth() / 2) + 185, (Engine.getHeight() / 2) + 25, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
+		this.okButton = new Button("ok", "Ok", (Engine.getWidth() / 2) + (width / 2) - 120, (Engine.getHeight() / 2) + (height / 2) - 55, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
 	}
 	
 	@Override
@@ -73,8 +73,8 @@ public class Dialog extends Component {
 	
 	@Override
 	public void resize() {
-		okButton.x = (Engine.getWidth() / 2) + 185;
-		okButton.y = (Engine.getHeight() / 2) + 25;
+		okButton.x = (Engine.getWidth() / 2) + (width / 2) - okButton.width - 20;
+		okButton.y = (Engine.getHeight() / 2) + (height / 2) - okButton.height - 20;
 		okButton.resize();
 	}
 

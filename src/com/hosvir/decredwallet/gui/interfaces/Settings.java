@@ -9,11 +9,15 @@ import java.awt.event.MouseWheelListener;
 
 import com.deadendgine.Engine;
 import com.deadendgine.input.Mouse;
+import com.deadendgine.utils.MathUtils;
 import com.hosvir.decredwallet.Api;
 import com.hosvir.decredwallet.Constants;
+import com.hosvir.decredwallet.gui.Button;
 import com.hosvir.decredwallet.gui.Component;
+import com.hosvir.decredwallet.gui.Dialog;
 import com.hosvir.decredwallet.gui.DropdownBox;
 import com.hosvir.decredwallet.gui.Images;
+import com.hosvir.decredwallet.gui.InputBox;
 import com.hosvir.decredwallet.gui.Interface;
 import com.hosvir.decredwallet.gui.Label;
 import com.hosvir.decredwallet.gui.Main;
@@ -29,6 +33,7 @@ public class Settings extends Interface implements MouseWheelListener {
 	private Rectangle[] peerRectangles;
 	public int peerHoverId = -1;
 	
+	@Override
 	public void init() {
 		headerThird = Engine.getWidth() / 3;
 		
@@ -37,58 +42,133 @@ public class Settings extends Interface implements MouseWheelListener {
 			rectangles[i] = new Rectangle(i*170,60,170,70);
 		}
 		
-		this.components.add(new Label("lang", Constants.languageLabel, 40, 190));
+		this.components.add(new Label("langLabel", Constants.languageLabel, 40, 190));
+		this.components.add(new Label("doubleClickDelayLabel", Constants.doubleClickDelayLabel, 40, 230));
+		this.components.add(new Label("scrollDistanceLabel", Constants.scrollDistanceLabel, 40, 270));
+		this.components.add(new Label("maxLogLinesLabel", Constants.maxLogLinesLabel, 40, 310));
+		this.components.add(new Label("fpsMaxLabel", Constants.fpsMaxLabel, 40, 350));
+		this.components.add(new Label("fpsMinLabel", Constants.fpsMinLabel, 40, 390));
 		
 		DropdownBox dropbox = new DropdownBox("langSelect", 250, 170, Engine.getWidth() - 295, 30, Constants.getLangFiles().toArray(new String[Constants.getLangFiles().size()]));
 		dropbox.text = Constants.langFile;
 		
+		InputBox doubleClickBox = new InputBox("doubleClickDelayInput", 250,210,Engine.getWidth() - 295,30);
+		InputBox scrollDistanceInput = new InputBox("scrollDistanceInput", 250,250,Engine.getWidth() - 295,30);
+		InputBox maxLogInput = new InputBox("maxLogLinesInput", 250,290,Engine.getWidth() - 295,30);
+		InputBox fpsMaxInput = new InputBox("fpsMaxInput", 250,330,Engine.getWidth() - 295,30);
+		InputBox fpsMinInput = new InputBox("fpsMinInput", 250,370,Engine.getWidth() - 295,30);
+		
+		doubleClickBox.text = String.valueOf(Constants.doubleClickDelay);
+		scrollDistanceInput.text = String.valueOf(Constants.scrollDistance);
+		maxLogInput.text = String.valueOf(Constants.maxLogLines);
+		fpsMaxInput.text = String.valueOf(Constants.fpsMax);
+		fpsMinInput.text = String.valueOf(Constants.fpsMin);
+		
 		this.components.add(dropbox);
+		this.components.add(doubleClickBox);
+		this.components.add(scrollDistanceInput);
+		this.components.add(maxLogInput);
+		this.components.add(fpsMaxInput);
+		this.components.add(fpsMinInput);
+		
+		this.components.add(new Button("save", "Save", Engine.getWidth() - 150, Engine.getHeight() - 105, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Dialog("errordiag", ""));
+		
+		
 		
 		Main.canvas.addMouseWheelListener(this);
 	}
 	
 	@Override
 	public synchronized void update(long delta) {
-		super.update(delta);
-		
-		//For each component
-		for(Component c : components) {
-			if(selectedId == 0 && c.containsMouse) Main.containsMouse = true;
-							
-			if(c instanceof DropdownBox) {
-				if(c.text != Constants.langFile) {
-					Constants.langFile = c.text.replace(".conf", "");
-					Constants.reloadLanguage();
-				}
-			}
-		}
-		
-		//Peer rectangles
-		if(selectedId == 2){
-			if(peerRectangles == null && Constants.globalCache.peers.size() > 0){
-				peerRectangles = new Rectangle[Constants.globalCache.peers.size()];
+		//Allow diag closing
+		if(getComponentByName("errordiag").isActive()) getComponentByName("errordiag").update(delta);
 				
-				for(int i = 0; i < peerRectangles.length; i++){
-					peerRectangles[i] = new Rectangle(Engine.getWidth() - 69, 225 + i*70 - scrollOffset, 50,50);
+		if(!blockInput) {
+			super.update(delta);
+			
+			//For each component
+			for(Component c : components) {
+				if(selectedId == 0 && c.containsMouse) Main.containsMouse = true;
+								
+				//Drop down
+				if(c instanceof DropdownBox) {
+					if(!c.text.replace(".conf", "").contains(Constants.langFile)) {
+						Constants.langFile = c.text.replace(".conf", "");
+						Constants.reloadLanguage();
+					}
+				}
+				
+				//Input
+				if(c instanceof InputBox) {
+					if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
+				}
+				
+				//Button
+				if(c instanceof Button) {
+					if(c.selectedId == 0){
+						if(!MathUtils.isNumeric(getComponentByName("doubleClickDelayInput").text) | 
+								!MathUtils.isNumeric(getComponentByName("scrollDistanceInput").text) |
+								!MathUtils.isNumeric(getComponentByName("maxLogLinesInput").text) |
+								!MathUtils.isNumeric(getComponentByName("fpsMaxInput").text) |
+								!MathUtils.isNumeric(getComponentByName("fpsMinInput").text)){
+							
+							getComponentByName("errordiag").text = Constants.integerError;
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+							
+						}else{
+							Constants.doubleClickDelay = Integer.valueOf(getComponentByName("doubleClickDelayInput").text);
+							Constants.scrollDistance = Integer.valueOf(getComponentByName("scrollDistanceInput").text);
+							Constants.maxLogLines = Integer.valueOf(getComponentByName("maxLogLinesInput").text);
+							Constants.fpsMax = Integer.valueOf(getComponentByName("fpsMaxInput").text);
+							Constants.fpsMin = Integer.valueOf(getComponentByName("fpsMinInput").text);
+							
+							Constants.saveSettings();
+							
+							getComponentByName("errordiag").text = Constants.settingsSavedMessage;
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+						}
+					}
+					
+					c.selectedId = -1;
 				}
 			}
 			
-			if(peerRectangles != null){
-				for(int i = 0; i < peerRectangles.length; i++){
-					if(peerRectangles[i] != null && peerRectangles[i].contains(Mouse.point)){
-						containsMouse = true;
-						peerHoverId = i;
-		
-						if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
-							Api.disconnectPeer(Constants.globalCache.peers.get(i).getValueByName("id"));
-							Mouse.release(MouseEvent.BUTTON1);
-							Constants.globalCache.forceUpdatePeers = true;
+			//Peer rectangles
+			if(selectedId == 2){
+				if(peerRectangles == null && Constants.globalCache.peers.size() > 0){
+					peerRectangles = new Rectangle[Constants.globalCache.peers.size()];
+					
+					for(int i = 0; i < peerRectangles.length; i++){
+						peerRectangles[i] = new Rectangle(Engine.getWidth() - 69, 225 + i*70 - scrollOffset, 50,50);
+					}
+				}
+				
+				if(peerRectangles != null){
+					for(int i = 0; i < peerRectangles.length; i++){
+						if(peerRectangles[i] != null && peerRectangles[i].contains(Mouse.point)){
+							containsMouse = true;
+							peerHoverId = i;
+			
+							if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
+								Api.disconnectPeer(Constants.globalCache.peers.get(i).getValueByName("id"));
+								Mouse.release(MouseEvent.BUTTON1);
+								Constants.globalCache.forceUpdatePeers = true;
+							}
 						}
 					}
 				}
+				
+				if(!containsMouse) peerHoverId = -1;
 			}
-			
-			if(!containsMouse) peerHoverId = -1;
 		}
 	}
 
@@ -123,9 +203,6 @@ public class Settings extends Interface implements MouseWheelListener {
 					Engine.getWidth() - 48,
 					60,
 					null);
-			
-			//Render
-			super.render(g);
 			break;
 		case 1: //Security
 			//Content box
@@ -207,8 +284,6 @@ public class Settings extends Interface implements MouseWheelListener {
 							Images.getRemoveIcon().getWidth(),
 							Images.getRemoveIcon().getHeight(),
 							null);
-					
-					// TODO format bytes to getMod(), rectangles, disconnect peer, force globalCache update
 										
 					//Address
 					g.setColor(Constants.walletBalanceColor);
@@ -316,6 +391,15 @@ public class Settings extends Interface implements MouseWheelListener {
 		g.drawString(Constants.mainButtonText, 60, 105);
 		g.drawString(Constants.securityButtonText, 210, 105);
 		g.drawString(Constants.networkButtonText, 375, 105);
+		
+		
+		if(selectedId == 0){
+			//Render
+			super.render(g);
+			
+			//Render lang dropdown last
+			getComponentByName("langSelect").render(g);
+		}
 	}
 	
 	@Override
@@ -324,7 +408,21 @@ public class Settings extends Interface implements MouseWheelListener {
 		headerThird = Engine.getWidth() / 3;
 		
 		getComponentByName("langSelect").width = Engine.getWidth() - 295;
+		getComponentByName("doubleClickDelayInput").width = Engine.getWidth() - 295;
+		getComponentByName("scrollDistanceInput").width = Engine.getWidth() - 295;
+		getComponentByName("maxLogLinesInput").width = Engine.getWidth() - 295;
+		getComponentByName("fpsMaxInput").width = Engine.getWidth() - 295;
+		getComponentByName("fpsMinInput").width = Engine.getWidth() - 295;
+		getComponentByName("save").x = Engine.getWidth() - 150;
+		getComponentByName("save").y = Engine.getHeight() - 105;
+
 		getComponentByName("langSelect").resize();
+		getComponentByName("doubleClickDelayInput").resize();
+		getComponentByName("scrollDistanceInput").resize();
+		getComponentByName("maxLogLinesInput").resize();
+		getComponentByName("fpsMaxInput").resize();
+		getComponentByName("fpsMinInput").resize();
+		getComponentByName("save").resize();
 		
 		super.resize();
 	}
