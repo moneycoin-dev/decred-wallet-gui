@@ -69,7 +69,7 @@ public class DecredWallet {
 		//Check to see if the daemon is ready
 		while(!Constants.isWalletReady()){
 			for(String s : Constants.getWalletProcess().log)
-				if(s.contains("RPC server listening"))
+				if(s.contains("Opened wallet"))
 					Constants.setWalletReady(true);
 				else if(s.contains("invalid passphrase for master public key"))
 					Constants.log("Need public key, edit settings.conf");

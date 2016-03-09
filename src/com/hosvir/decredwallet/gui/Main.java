@@ -287,10 +287,10 @@ public class Main extends BaseGame {
 					Constants.guiLog.remove(i);
 			}else if(Constants.getDaemonProcess().log.size() > Constants.maxLogLines) {
 				for(int i = 0; i < 100; i++)
-					Constants.guiLog.remove(i);
+					Constants.getDaemonProcess().log.remove(i);
 			}else if(Constants.getWalletProcess().log.size() > Constants.maxLogLines) {
 				for(int i = 0; i < 100; i++)
-					Constants.guiLog.remove(i);
+					Constants.getWalletProcess().log.remove(i);
 			}
 		}
 	}
@@ -326,7 +326,7 @@ public class Main extends BaseGame {
 				
 				g.setColor(Constants.flatRed);
 				g.setFont(Constants.dcrFont);
-				g.drawString("Loading" + loadingAnimationString, (Engine.getWidth() / 2) - 60, 30);
+				g.drawString("Loading" + loadingAnimationString, (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Loading") / 2), 30);
 				
 				g.setFont(Constants.labelFont);
 				if(!Constants.isDaemonReady()){

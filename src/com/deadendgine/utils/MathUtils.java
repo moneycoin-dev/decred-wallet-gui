@@ -63,7 +63,7 @@ public class MathUtils {
 	 */
 	public static boolean isNumeric(String string) {
 		try {
-			int i = Integer.parseInt(string);
+			Integer.parseInt(string);
 			return true;
 		}catch(NumberFormatException e){
 			return false;

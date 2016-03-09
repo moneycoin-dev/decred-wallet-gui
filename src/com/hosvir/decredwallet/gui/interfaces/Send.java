@@ -3,11 +3,15 @@ package com.hosvir.decredwallet.gui.interfaces;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import com.deadendgine.Engine;
+import com.deadendgine.input.Mouse;
 import com.hosvir.decredwallet.Account;
 import com.hosvir.decredwallet.Api;
 import com.hosvir.decredwallet.Constants;
+import com.hosvir.decredwallet.Contact;
 import com.hosvir.decredwallet.gui.Button;
 import com.hosvir.decredwallet.gui.Component;
 import com.hosvir.decredwallet.gui.Dialog;
@@ -24,9 +28,13 @@ import com.hosvir.decredwallet.gui.Main;
 public class Send extends Interface {
 	private int headerThird;
 	private boolean readyToSend;
+	private ArrayList<String> suggestions;
+	private int hoverSuggestionId;
+	private String to;
 	
 	@Override
 	public void init() {
+		suggestions = new ArrayList<String>();
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
 		Button cancel = new Button("cancel", Constants.cancelButtonText, 350, 500, 100, 35, Constants.flatRed, Constants.flatRedHover);
@@ -86,6 +94,7 @@ public class Send extends Interface {
 			if(getComponentByName("to").text != "" && getComponentByName("fee").text != "" && getComponentByName("amount").text != "") 
 				getComponentByName("send").enabled = true; else getComponentByName("send").enabled = false;
 			
+			
 			//Check for sending
 			if(Constants.getPrivatePassPhrase() != null && getComponentByName("to").text != "") {
 				if(getComponentByName("fee").text != String.valueOf(Api.getWalletFee())){
@@ -99,11 +108,19 @@ public class Send extends Interface {
 				}
 				
 				if(readyToSend){
+					//Check if sending to contact
+					if(Constants.isContact(getComponentByName("to").text)){
+						to = Constants.getContact(getComponentByName("to").text).getAddress();
+					}else{
+						to = getComponentByName("to").text;
+					}
+					
+					//Unlock wallet
 					String unlock = Api.unlockWallet("30");
 					
 					if(unlock == null | unlock.trim().length() < 1){
 						String txId = Api.sendFrom(getComponentByName("from").text, 
-								getComponentByName("to").text, 
+								to, 
 								getComponentByName("comment").text, 
 								getComponentByName("amount").text);
 						
@@ -176,6 +193,36 @@ public class Send extends Interface {
 				
 				//Input boxes
 				if(c instanceof InputBox) {
+					
+					//Check for similar contact
+					if(c.getName() == "to"){
+						if(c.text.trim() != "" && c.selectedId == 0) {
+							for(Contact cc : Constants.contacts) {
+								if(cc.getName().toLowerCase().contains(getComponentByName("to").text.toLowerCase())){
+									if(!suggestions.contains(cc.getName())) suggestions.add(cc.getName());
+								}else{
+									if(suggestions.contains(cc.getName())) suggestions.remove(cc.getName());
+								}
+								
+								//Loop over each suggestion
+								for(int i = 0; i < suggestions.size(); i++){
+									if(new Rectangle(500, 281 + i*35, Engine.getWidth() - 545, 35).contains(Mouse.point)){
+										containsMouse = true;
+										hoverSuggestionId = i;
+							 
+										if(Mouse.isMouseDown(MouseEvent.BUTTON1)) {
+											c.text = suggestions.get(i);
+											c.selectedId = -1;
+											Mouse.release(MouseEvent.BUTTON1);
+										}
+									}
+								}
+								
+								if(!containsMouse) hoverSuggestionId = -1;
+							}
+						}
+					}
+					
 					if(c.clickCount > 0) Constants.unselectOtherInputs(components, c);
 				}
 			}
@@ -316,6 +363,28 @@ public class Send extends Interface {
 			
 			//Render
 			super.render(g);
+			
+			//Suggestions
+			if(getComponentByName("to").selectedId == 0 && getComponentByName("to").text.trim() != ""){
+				g.setColor(Color.WHITE);
+				g.fillRect(500, 
+						281, 
+						Engine.getWidth() - 545, 
+						35 * suggestions.size());
+						
+				g.setColor(Constants.settingsSelectedColor);
+				g.drawRect(500, 
+						281, 
+						Engine.getWidth() - 545, 
+						35 * suggestions.size());
+				
+				g.setFont(Constants.settingsFont);
+				
+				for(int i = 0; i < suggestions.size(); i++){
+					if(hoverSuggestionId == i) g.setColor(Constants.flatBlue); else g.setColor(Constants.labelColor);
+					g.drawString(suggestions.get(i), 500 + 10, 271 + ((i+1) * 35));
+				}
+			}
 		}
 		
 		

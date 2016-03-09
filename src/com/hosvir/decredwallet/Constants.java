@@ -179,8 +179,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.5-beta";
-		buildDate = "04/03/2016";
+		version = "0.0.6-beta";
+		buildDate = "09/03/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -231,17 +231,15 @@ public class Constants {
 			daemonBin = "dcrd.exe";
 			walletBin = "dcrwallet.exe";
 			dcrctlBin = "dcrctl.exe";
-			extraDaemonArguments = " --notls";
-			extraWalletArguments = " --noservertls --noclienttls";
-			extraDcrctlArguments = " --notls";
 		}else{
 			daemonBin = "dcrd";
 			walletBin = "dcrwallet";
 			dcrctlBin = "dcrctl";
-			extraDaemonArguments = "";
-			extraWalletArguments = "";
-			extraDcrctlArguments = "";
 		}
+		
+		extraDaemonArguments = "";
+		extraWalletArguments = "";
+		extraDcrctlArguments = "";
 		
 		try{
 			properties.load(new FileInputStream(settingsFile));
@@ -881,6 +879,22 @@ public class Constants {
 	
 	public static ArrayList<String> getLangFiles() {
 		return langFiles;
+	}
+	
+	public static boolean isContact(String name) {
+		for(Contact c : contacts) 
+			if(c.getName().toLowerCase().trim().contains(name.toLowerCase().trim()))
+				return true;
+		
+		return false;		
+	}
+	
+	public static Contact getContact(String name) {
+		for(Contact c : contacts) 
+			if(c.getName().toLowerCase().trim().contains(name.toLowerCase().trim()))
+				return c;
+		
+		return null;		
 	}
 	
 }
