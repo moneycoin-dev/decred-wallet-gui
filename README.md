@@ -1,6 +1,6 @@
 # decred-wallet
 Decred Wallet GUI is a front end built in Java using the Canvas with an OpenGL pipeline for rendering graphics.
-All components are made using Graphics2D and images where required, this gives us full flexability to create anything we want without the limitations of swing or other frameworks.
+All components are made using Graphics2D and images where required, this gives us full flexibility to create anything we want without the limitations of swing or other frameworks.
 
 ####Index:
 * [Downloads](#download-binaries)  
@@ -43,6 +43,8 @@ ___
   * Manual ticket purchase
 * Send coins
   * Send from specified account
+  * Send to contact
+  * Suggestions when typing in to field
 * Receive coins
   * Get new address
   * View all current addresses per account
