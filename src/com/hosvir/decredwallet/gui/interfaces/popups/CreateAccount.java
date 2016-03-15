@@ -26,8 +26,8 @@ public class CreateAccount extends Interface {
 		
 		this.components.add(new InputBox("account", (Engine.getWidth() / 2) - 250,Engine.getHeight() / 2,500,30));
 		this.components.add(passphrase);
-		this.components.add(new Button("cancel", Constants.cancelButtonText, 30, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 130, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 30, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatRed, Constants.flatRedHover));
+		this.components.add(new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 130, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 	}
 	
 	@Override
@@ -88,7 +88,7 @@ public class CreateAccount extends Interface {
 		g.setFont(Constants.labelFont);
 		g.setColor(Constants.labelColor);
 		
-		g.drawString(Constants.addAccountMessage, (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.addAccountMessage) / 2), Engine.getHeight() / 2 - 50);
+		g.drawString(Constants.getLangValue("Add-Account-Message"), (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Add-Account-Message")) / 2), Engine.getHeight() / 2 - 50);
 		
 		
 		//Render

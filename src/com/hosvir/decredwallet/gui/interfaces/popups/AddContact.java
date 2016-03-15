@@ -23,16 +23,16 @@ public class AddContact extends Interface {
 	public void init() {
 		selectedId = -1;
 		
-		this.components.add(new Label("nameLabel", Constants.nameLabel, (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) - 30));
-		this.components.add(new Label("emailLabel", Constants.emailLabel, (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) +10));
-		this.components.add(new Label("addressLabel", Constants.addressLabel, (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) + 50));
+		this.components.add(new Label("nameLabel", Constants.getLangValue("Name-Label"), (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) - 30));
+		this.components.add(new Label("emailLabel", Constants.getLangValue("Email-Label"), (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) +10));
+		this.components.add(new Label("addressLabel", Constants.getLangValue("Address-Label"), (Engine.getWidth() / 2) - 340, (Engine.getHeight() / 2) + 50));
 		
 		this.components.add(new InputBox("name", (Engine.getWidth() / 2) - 180,(Engine.getHeight() / 2) - 50,500,30));
 		this.components.add(new InputBox("email", (Engine.getWidth() / 2) - 180,(Engine.getHeight() / 2) - 10,500,30));
 		this.components.add(new InputBox("address", (Engine.getWidth() / 2) - 180,(Engine.getHeight() / 2) + 30,500,30));
 		
-		this.components.add(new Button("cancel", Constants.cancelButtonText, 30, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 130, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 30, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatRed, Constants.flatRedHover));
+		this.components.add(new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 130, (Engine.getHeight() / 2) + 70, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 	}
 	
 	@Override
@@ -90,7 +90,7 @@ public class AddContact extends Interface {
 		g.setFont(Constants.labelFont);
 		g.setColor(Constants.labelColor);
 		
-		g.drawString(Constants.addContactMessage, (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.addContactMessage) / 2), (Engine.getHeight() / 2) - 70);
+		g.drawString(Constants.getLangValue("Add-Contact-Message"), (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Add-Contact-Message")) / 2), (Engine.getHeight() / 2) - 70);
 		
 		
 		//Render

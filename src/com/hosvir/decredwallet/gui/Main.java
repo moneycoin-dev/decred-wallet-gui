@@ -24,6 +24,8 @@ import com.hosvir.decredwallet.gui.interfaces.Navbar;
 import com.hosvir.decredwallet.gui.interfaces.Receive;
 import com.hosvir.decredwallet.gui.interfaces.Send;
 import com.hosvir.decredwallet.gui.interfaces.Settings;
+import com.hosvir.decredwallet.gui.interfaces.SettingsNetwork;
+import com.hosvir.decredwallet.gui.interfaces.SettingsSecurity;
 import com.hosvir.decredwallet.gui.interfaces.Staking;
 import com.hosvir.decredwallet.gui.interfaces.Wallet;
 import com.hosvir.decredwallet.gui.interfaces.popups.AddContact;
@@ -154,6 +156,8 @@ public class Main extends BaseGame {
 		Constants.guiInterfaces.add(new Receive());
 		Constants.guiInterfaces.add(new Logs());
 		Constants.guiInterfaces.add(new Settings());
+		Constants.guiInterfaces.add(new SettingsSecurity());
+		Constants.guiInterfaces.add(new SettingsNetwork());
 		Constants.guiInterfaces.add(new AddContact());
 		Constants.guiInterfaces.add(new CreateAccount());
 		Constants.guiInterfaces.add(new RenameAccount());

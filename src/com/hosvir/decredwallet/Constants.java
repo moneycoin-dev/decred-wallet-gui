@@ -15,6 +15,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.JOptionPane;
@@ -52,6 +54,9 @@ public class Constants {
 	private static String extraDaemonArguments;
 	private static String extraWalletArguments;
 	private static String extraDcrctlArguments;
+	private static String dcrdFolder;
+	private static String dcrwalletFolder;
+	private static String osQuote;
 	private static String daemonCommand;
 	private static String walletCommand;
 	private static String dcrctlBaseCommand;
@@ -81,56 +86,6 @@ public class Constants {
 	private static Random random;
 	private static ArrayList<String> langFiles;
 	public static String langFile;
-	
-	
-	public static String windowTitle = "Missing lang conf";
-	public static String dcrLabel = "Missing lang conf";
-	public static String availableLabel = "Missing lang conf";
-	public static String pendingLabel = "Missing lang conf";
-	public static String lockedLabel = "Missing lang conf";
-	public static String fromLabel = "Missing lang conf";
-	public static String toLabel = "Missing lang conf";
-	public static String commentLabel = "Missing lang conf";
-	public static String feeLabel = "Missing lang conf";
-	public static String amountLabel = "Missing lang conf";
-	public static String languageLabel = "Missing lang conf";
-	public static String doubleClickDelayLabel = "Missing lang conf";
-	public static String scrollDistanceLabel = "Missing lang conf";
-	public static String maxLogLinesLabel = "Missing lang conf";
-	public static String fpsMaxLabel = "Missing lang conf";
-	public static String fpsMinLabel = "Missing lang conf";
-	public static String nameLabel = "Missing lang conf";
-	public static String emailLabel = "Missing lang conf";
-	public static String addressLabel = "Missing lang conf";
-	public static String blocksLabel = "Missing lang conf";
-	public static String difficultyLabel = "Missing lang conf";
-	public static String peersLabel = "Missing lang conf";
-	public static String limitLabel = "Missing lang conf";
-	
-	public static String addButtonText = "Missing lang conf";
-	public static String cancelButtonText = "Missing lang conf";
-	public static String confirmButtonText = "Missing lang conf";
-	public static String okButtonText = "Missing lang conf";
-	public static String getNewButtonText = "Missing lang conf";
-	public static String sendButtonText = "Missing lang conf";
-	public static String daemonButtonText = "Missing lang conf";
-	public static String walletButtonText = "Missing lang conf";
-	public static String guiButtonText = "Missing lang conf";
-	public static String mainButtonText = "Missing lang conf";
-	public static String securityButtonText = "Missing lang conf";
-	public static String networkButtonText = "Missing lang conf";
-	
-	public static String addAccountMessage = "Missing lang conf";
-	public static String renameAccountMessage = "Missing lang conf";
-	public static String enterPassphraseMessage = "Missing lang conf";
-	public static String newAddressMessage = "Missing lang conf";
-	public static String addContactMessage = "Missing lang conf";
-	public static String clipboardMessage = "Missing lang conf";
-	public static String settingsSavedMessage = "Missing lang conf";
-	
-	public static String insufficientFundsError = "Missing lang conf";
-	public static String integerError = "Missing lang conf";
-	public static String error = "Missing lang conf";
 	
 	private static Properties properties;
 	
@@ -170,6 +125,7 @@ public class Constants {
 	public static ArrayList<BaseGui> guiInterfaces = new ArrayList<BaseGui>();
 	public static ArrayList<Contact> contacts = new ArrayList<Contact>();
 	public static ArrayList<String> langConfFiles = new ArrayList<String>();
+	public static HashMap<String, String> langValues = new HashMap<String, String>();
 	public static Navbar navbar;
 	public static GlobalCache globalCache;
 	public static String accountToRename;
@@ -179,24 +135,57 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.6-beta";
-		buildDate = "09/03/2016";
+		version = "0.0.7-beta";
+		buildDate = "15/03/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
 		
+		System.out.println("Created by Fsig.");
+		System.out.println("Version: " + Constants.getVersion());
+		System.out.println("Build date: " + Constants.getBuildDate() + "\n");
+		Constants.guiLog.add("Created by Fsig.");
+		Constants.guiLog.add("Version: " + Constants.getVersion());
+		Constants.guiLog.add("Build date: " + Constants.getBuildDate() + "\n");
+		
+		//OS is Windows... poor fella
+		if(getOS().contains("Windows")){
+			osQuote = "\"";
+			daemonBin = "dcrd.exe";
+			walletBin = "dcrwallet.exe";
+			dcrctlBin = "dcrctl.exe";
+			dcrdFolder = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Local" + File.separator + "Dcrd";
+			dcrwalletFolder = System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Local" + File.separator +  "Dcrwallet";
+		}else{
+			osQuote = "'";
+			daemonBin = "dcrd";
+			walletBin = "dcrwallet";
+			dcrctlBin = "dcrctl";
+			dcrdFolder = System.getProperty("user.home") + File.separator + ".dcrd";
+			dcrwalletFolder = System.getProperty("user.home") + File.separator + ".dcrwallet";
+		}
+		
+		extraDaemonArguments = "";
+		extraWalletArguments = "";
+		extraDcrctlArguments = "";
+		
 		userHome = System.getProperty("user.home") + File.separator + "DecredWallet" + File.separator;
 		settingsFile = new File(userHome + "settings.conf");
 		langFolder = new File(userHome + File.separator + "lang");
-		dcrdCert = new File(userHome + ".dcrd" + File.separator + "rpc.cert");
-		walletCert = new File(userHome + ".dcrwallet" + File.separator + "rpc.cert");
+		dcrdCert = new File(dcrdFolder + File.separator + "rpc.cert");
+		walletCert = new File(dcrwalletFolder + File.separator + "rpc.cert");
 		allowedPasswordClasses = new ArrayList<String>();
 		allowedPasswordClasses.add("com.hosvir.decredwallet.DecredWallet");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.Api");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Send");
+		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.SettingsSecurity");
 		
 		langConfFiles.add("English.conf");
 		langConfFiles.add("Deutsch.conf");
+		langConfFiles.add("Chinese.conf");
+		langConfFiles.add("Japanese.conf");
+		langConfFiles.add("Spanish.conf");
+		langConfFiles.add("Russian.conf");
 		
 		properties = new Properties();
 		
@@ -225,21 +214,6 @@ public class Constants {
 		for(File f : langFolder.listFiles()){
 			langFiles.add(f.getName());
 		}
-		
-		//OS is Windows... poor fella
-		if(getOS().contains("Windows")){
-			daemonBin = "dcrd.exe";
-			walletBin = "dcrwallet.exe";
-			dcrctlBin = "dcrctl.exe";
-		}else{
-			daemonBin = "dcrd";
-			walletBin = "dcrwallet";
-			dcrctlBin = "dcrctl";
-		}
-		
-		extraDaemonArguments = "";
-		extraWalletArguments = "";
-		extraDcrctlArguments = "";
 		
 		try{
 			properties.load(new FileInputStream(settingsFile));
@@ -275,7 +249,7 @@ public class Constants {
 			//Check for public pass
 			if(publicPassPhrase != null && publicPassPhrase.length() > 1){
 				requirePublicPass = true;
-				extraWalletArguments += " --walletpass '" + publicPassPhrase + "'";
+				extraWalletArguments += " --walletpass " + osQuote + publicPassPhrase + osQuote;
 			}
 			
 			//Check for testnet
@@ -289,17 +263,17 @@ public class Constants {
 			e.printStackTrace();
 		}
 		
-		daemonCommand = decredLocation + daemonBin + " -u '" + 
-						daemonUsername + "' -P '" + 
-						daemonPassword + "'" + 
+		daemonCommand = decredLocation + daemonBin + " -u " + osQuote + 
+						daemonUsername + osQuote + " -P " + osQuote +
+						daemonPassword + osQuote + 
 						extraDaemonArguments;
-		walletCommand = decredLocation + walletBin + " -u '" + 
-						daemonUsername + "' -P '" + 
-						daemonPassword + "'" + 
+		walletCommand = decredLocation + walletBin + " -u " + osQuote +
+						daemonUsername + osQuote + " -P " + osQuote +
+						daemonPassword + osQuote + 
 						extraWalletArguments;
-		dcrctlBaseCommand = decredLocation + dcrctlBin + " -u '" +
-						daemonUsername + "' -P '" +
-						daemonPassword + "'" +
+		dcrctlBaseCommand = decredLocation + dcrctlBin + " -u " + osQuote +
+						daemonUsername + osQuote + " -P " + osQuote +
+						daemonPassword + osQuote +
 						extraDcrctlArguments;
 		
 		
@@ -359,62 +333,19 @@ public class Constants {
 			//No contacts file
 		}
 	}
-	
+
 	/**
 	 * Reload the language from file
 	 */
 	public static void reloadLanguage() {
 		try{
+			langValues.clear();
+			properties.clear();
 			properties.load(new FileInputStream(new File(langFolder + File.separator + langFile + ".conf")));
 			
-			windowTitle = properties.getProperty("Window-Title");
-			dcrLabel = properties.getProperty("DCR-Label");
-			availableLabel = properties.getProperty("Available-Label");
-			pendingLabel = properties.getProperty("Pending-Label");
-			lockedLabel = properties.getProperty("Locked-Label");
-			fromLabel = properties.getProperty("From-Label");
-			toLabel = properties.getProperty("To-Label");
-			commentLabel = properties.getProperty("Comment-Label");
-			feeLabel = properties.getProperty("Fee-Label");
-			amountLabel = properties.getProperty("Amount-Label");
-			languageLabel = properties.getProperty("Language-Label");
-			doubleClickDelayLabel = properties.getProperty("Double-Click-Delay-Label");
-			scrollDistanceLabel = properties.getProperty("Scroll-Distance-Label");
-			maxLogLinesLabel = properties.getProperty("Max-Log-Lines-Label");
-			fpsMaxLabel = properties.getProperty("Fps-Max-Label");
-			fpsMinLabel = properties.getProperty("Fps-Min-Label");
-			nameLabel = properties.getProperty("Name-Label");
-			emailLabel = properties.getProperty("Email-Label");
-			addressLabel = properties.getProperty("Address-Label");
-			blocksLabel = properties.getProperty("Blocks-Label");
-			difficultyLabel = properties.getProperty("Difficulty-Label");
-			peersLabel = properties.getProperty("Peers-Label");
-			limitLabel = properties.getProperty("Limit-Label");
-			
-			addButtonText = properties.getProperty("Add-Button-Text");
-			cancelButtonText = properties.getProperty("Cancel-Button-Text");
-			confirmButtonText = properties.getProperty("Confirm-Button-Text");
-			okButtonText = properties.getProperty("Ok-Button-Text");
-			sendButtonText = properties.getProperty("Send-Button-Text");
-			getNewButtonText = properties.getProperty("Get-New-Button-Text");
-			daemonButtonText = properties.getProperty("Daemon-Button-Text");
-			walletButtonText = properties.getProperty("Wallet-Button-Text");
-			guiButtonText = properties.getProperty("GUI-Button-Text");
-			mainButtonText = properties.getProperty("Main-Button-Text");
-			securityButtonText = properties.getProperty("Security-Button-Text");
-			networkButtonText = properties.getProperty("Network-Button-Text");
-			
-			addAccountMessage = properties.getProperty("Add-Account-Message");
-			renameAccountMessage = properties.getProperty("Rename-Account-Message");
-			enterPassphraseMessage = properties.getProperty("Enter-Passphrase-Message");
-			newAddressMessage = properties.getProperty("New-Address-Message");
-			addContactMessage = properties.getProperty("Add-Contact-Message");
-			clipboardMessage = properties.getProperty("Clipboard-Mesage");
-			settingsSavedMessage = properties.getProperty("Settings-Saved-Mesage");
-			
-			insufficientFundsError = properties.getProperty("Insufficient-Funds-Error");
-			integerError = properties.getProperty("Integer-Error");
-			error = properties.getProperty("Error");
+			for(Map.Entry<Object, Object> e : properties.entrySet()){
+				langValues.put((String) e.getKey(),(String) e.getValue());
+			}
 		}catch(Exception e){
 			log("Error loading language.");
 			e.printStackTrace();
@@ -448,7 +379,7 @@ public class Constants {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=true", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-FPS=false", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Max=30", true, true);
-		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=1", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=10", true, true);
 		
 		//Create version file
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
@@ -523,6 +454,11 @@ public class Constants {
 			}
 		}
 		
+		//Create contacts file
+		if(!new File(userHome + "contacts.data").exists()){
+			FileWriter.writeToFile(userHome + "contacts.data", "Donate:fsig@hmamail.com:DsmcWt82aeraJ22bayUtMXm8dyRL8bFnBVY", false, false);
+		}
+		
 		//Last, update version
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
 	}
@@ -548,6 +484,21 @@ public class Constants {
 		guiLog.add(getDate() + ": " + message);
 		
 		if(guiInterfaces.size() > 5) guiInterfaces.get(5).resize();
+	}
+	
+	/**
+	 * Get lang value.
+	 * 
+	 * @param key
+	 * @return String
+	 */
+	public static String getLangValue(String key) {
+		for(Map.Entry<String, String> e : langValues.entrySet()){
+			if(e.getKey().toLowerCase().contains(key.toLowerCase()))
+				return e.getValue();
+		}
+		
+		return "Missing lang conf";
 	}
 	
 	/**
@@ -895,6 +846,10 @@ public class Constants {
 				return c;
 		
 		return null;		
+	}
+	
+	public static String getOsQuote() {
+		return osQuote;
 	}
 	
 }

@@ -37,8 +37,8 @@ public class Send extends Interface {
 		suggestions = new ArrayList<String>();
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
-		Button cancel = new Button("cancel", Constants.cancelButtonText, 350, 500, 100, 35, Constants.flatRed, Constants.flatRedHover);
-		Button send = new Button("send", Constants.sendButtonText, Engine.getWidth() - 150, 500, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
+		Button cancel = new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 350, 500, 100, 35, Constants.flatRed, Constants.flatRedHover);
+		Button send = new Button("send", Constants.getLangValue("Send-Button-Text"), Engine.getWidth() - 150, 500, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
 		send.enabled = false;
 		
 		
@@ -128,7 +128,7 @@ public class Send extends Interface {
 							Constants.log("Unable to send DCR. " + txId);
 						}else if(txId.contains("insufficient funds")){
 							Constants.log("Insufficient funds: " + txId);
-							getComponentByName("errordiag").text = Constants.insufficientFundsError;
+							getComponentByName("errordiag").text = Constants.getLangValue("Insufficient-Funds-Error");
 							
 							//Show dialog
 							this.blockInput = true;
@@ -136,7 +136,7 @@ public class Send extends Interface {
 							getComponentByName("errordiag").selectedId = 0;
 						}else{
 							Constants.log("Sucess, transaction id: " + txId);
-							getComponentByName("errordiag").text = Constants.clipboardMessage + ": " + txId;
+							getComponentByName("errordiag").text = Constants.getLangValue("Clipboard-Message") + ": " + txId;
 							
 							//Show dialog
 							this.blockInput = true;
@@ -145,7 +145,7 @@ public class Send extends Interface {
 						}
 					}else{
 						Constants.log("Error: " + unlock);
-						getComponentByName("errordiag").text = Constants.error + " " + unlock;
+						getComponentByName("errordiag").text = Constants.getLangValue("Error") + " " + unlock;
 						
 						//Show dialog
 						this.blockInput = true;
@@ -301,7 +301,7 @@ public class Send extends Interface {
 			//DCR and Balance
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.dcrFont);
-			g.drawString(Constants.dcrLabel, Engine.getWidth() / 2, 100);
+			g.drawString(Constants.getLangValue("DCR-Label"), Engine.getWidth() / 2, 100);
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
@@ -311,9 +311,9 @@ public class Send extends Interface {
 			//Available, Pending and Locked
 			g.setColor(Constants.labelColor);
 			g.setFont(Constants.labelFont);
-			g.drawString(Constants.availableLabel, Engine.getWidth() - (headerThird * 3), 125);
-			g.drawString(Constants.pendingLabel, Engine.getWidth() - (headerThird * 2), 125);
-			g.drawString(Constants.lockedLabel, Engine.getWidth() - (headerThird * 1), 125);
+			g.drawString(Constants.getLangValue("Available-Label"), Engine.getWidth() - (headerThird * 3), 125);
+			g.drawString(Constants.getLangValue("Pending-Label"), Engine.getWidth() - (headerThird * 2), 125);
+			g.drawString(Constants.getLangValue("Locked-Label"), Engine.getWidth() - (headerThird * 1), 125);
 			
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);
@@ -355,11 +355,11 @@ public class Send extends Interface {
 			g.setFont(Constants.labelFont);
 			g.setColor(Constants.labelColor);
 			
-			g.drawString(Constants.fromLabel, 350, 220);
-			g.drawString(Constants.toLabel, 350, 270);
-			g.drawString(Constants.commentLabel, 350, 345);
-			g.drawString(Constants.feeLabel, 350, 425);
-			g.drawString(Constants.amountLabel, 350, 475);
+			g.drawString(Constants.getLangValue("From-Label"), 350, 220);
+			g.drawString(Constants.getLangValue("To-Label"), 350, 270);
+			g.drawString(Constants.getLangValue("Comment-Label"), 350, 345);
+			g.drawString(Constants.getLangValue("Fee-Label"), 350, 425);
+			g.drawString(Constants.getLangValue("Amount-Label"), 350, 475);
 			
 			//Render
 			super.render(g);

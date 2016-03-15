@@ -23,13 +23,6 @@ public class DecredWallet {
 		//Setup constants
 		Constants.initialise();
 		
-		System.out.println("Created by Fsig.");
-		System.out.println("Version: " + Constants.getVersion());
-		System.out.println("Build date: " + Constants.getBuildDate() + "\n");
-		Constants.guiLog.add("Created by Fsig.");
-		Constants.guiLog.add("Version: " + Constants.getVersion());
-		Constants.guiLog.add("Build date: " + Constants.getBuildDate() + "\n");
-		
 		// TODO look into changing this to use log files rather than killing process
 		if(Processes.getClosestProcess("dcrd") != -1){ 
 			Processes.killByName("dcrd");

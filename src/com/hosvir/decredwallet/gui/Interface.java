@@ -9,12 +9,13 @@ import java.util.ArrayList;
  *
  */
 public abstract class Interface extends BaseGui {
+	public boolean blockComponents;
 	public ArrayList<Component> components = new ArrayList<Component>();
 	
 	@Override
 	public void update(long delta) {
 		super.update(delta);
-		for(Component c : components) c.update(delta);
+		if(!blockComponents) for(Component c : components) c.update(delta);
 	}
 	
 	@Override

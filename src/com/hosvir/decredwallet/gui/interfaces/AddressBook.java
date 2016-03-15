@@ -25,8 +25,8 @@ public class AddressBook extends Interface implements MouseWheelListener {
 	
 	@Override
 	public void init() {		
-		this.components.add(new Button("add", Constants.addButtonText,20,80,100,35,Constants.flatBlue,Constants.flatBlueHover));
-		this.components.add(new Dialog("clipboard", Constants.clipboardMessage));
+		this.components.add(new Button("add", Constants.getLangValue("Add-Button-Text"),20,80,100,35,Constants.flatBlue,Constants.flatBlueHover));
+		this.components.add(new Dialog("clipboard", Constants.getLangValue("Clipboard-Message")));
 		Main.canvas.addMouseWheelListener(this);
 	}
 	
@@ -60,7 +60,7 @@ public class AddressBook extends Interface implements MouseWheelListener {
 						Constants.setClipboardString(Constants.contacts.get(selectedId - (Constants.contacts.size()*3)).getAddress());
 					}
 					
-					getComponentByName("clipboard").text = Constants.clipboardMessage + ": " + Constants.getClipboardString();
+					getComponentByName("clipboard").text = Constants.getLangValue("Clipboard-Message") + ": " + Constants.getClipboardString();
 					getComponentByName("clipboard").selectedId = 0;
 				}else{
 					Constants.removeContact(Constants.contacts.get(selectedId));

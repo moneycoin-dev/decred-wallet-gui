@@ -33,8 +33,8 @@ public class Receive extends Interface implements MouseWheelListener {
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
-		this.components.add(new Button("new", Constants.getNewButtonText, Engine.getWidth() - 150, 200, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
-		this.components.add(new Dialog("newaddr", Constants.newAddressMessage));
+		this.components.add(new Button("new", Constants.getLangValue("Get-New-Button-Text"), Engine.getWidth() - 150, 200, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Dialog("newaddr", Constants.getLangValue("New-Address-Message")));
 		
 		Main.canvas.addMouseWheelListener(this);
 	}
@@ -69,7 +69,7 @@ public class Receive extends Interface implements MouseWheelListener {
 				//Update
 				Constants.accounts.get(selectedId).forceUpdate = true;
 				
-				getComponentByName("newaddr").text = Constants.newAddressMessage;
+				getComponentByName("newaddr").text = Constants.getLangValue("New-Address-Message");
 				
 				//Show dialog
 				this.blockInput = true;
@@ -104,7 +104,7 @@ public class Receive extends Interface implements MouseWheelListener {
 	
 					if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
 						Constants.setClipboardString(Constants.accounts.get(selectedId).addresses[receiveHoverId].trim());
-						getComponentByName("newaddr").text = Constants.clipboardMessage + ": " + Constants.getClipboardString();
+						getComponentByName("newaddr").text = Constants.getLangValue("Clipboard-Message") + ": " + Constants.getClipboardString();
 						
 						//Show dialog
 						this.blockInput = true;
@@ -228,7 +228,7 @@ public class Receive extends Interface implements MouseWheelListener {
 			//DCR and Balance
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.dcrFont);
-			g.drawString(Constants.dcrLabel, Engine.getWidth() / 2, 100);
+			g.drawString(Constants.getLangValue("DCR-Label"), Engine.getWidth() / 2, 100);
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
@@ -238,9 +238,9 @@ public class Receive extends Interface implements MouseWheelListener {
 			//Available, Pending and Locked
 			g.setColor(Constants.labelColor);
 			g.setFont(Constants.labelFont);
-			g.drawString(Constants.availableLabel, Engine.getWidth() - (headerThird * 3), 125);
-			g.drawString(Constants.pendingLabel, Engine.getWidth() - (headerThird * 2), 125);
-			g.drawString(Constants.lockedLabel, Engine.getWidth() - (headerThird * 1), 125);
+			g.drawString(Constants.getLangValue("Available-Label"), Engine.getWidth() - (headerThird * 3), 125);
+			g.drawString(Constants.getLangValue("Pending-Label"), Engine.getWidth() - (headerThird * 2), 125);
+			g.drawString(Constants.getLangValue("Locked-Label"), Engine.getWidth() - (headerThird * 1), 125);
 			
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);

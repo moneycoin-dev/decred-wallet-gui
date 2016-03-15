@@ -33,7 +33,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 	public void init() {
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
-		this.components.add(new Button("add", Constants.addButtonText, 20, Engine.getHeight() - 80, 255, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("add", Constants.getLangValue("Add-Button-Text"), 20, Engine.getHeight() - 80, 255, 35, Constants.flatBlue, Constants.flatBlueHover));
 		
 		Dialog errorDiag = new Dialog("errordiag", "");
 		errorDiag.width = 800;
@@ -111,7 +111,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 		
 						if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
 							Constants.setClipboardString(Constants.globalCache.transactions.get(txHoverId).getValueByName("txid").trim());
-							getComponentByName("errordiag").text = Constants.clipboardMessage + ": " + Constants.getClipboardString();
+							getComponentByName("errordiag").text = Constants.getLangValue("Clipboard-Message") + ": " + Constants.getClipboardString();
 							
 							//Show dialog
 							this.blockInput = true;
@@ -131,7 +131,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 	@Override
 	public void render(Graphics2D g) {
 		//Transactions
-		if(Constants.accounts.size() > 0 && selectedId == 0){
+		if(Constants.globalCache.transactions.size() > 1 && selectedId == 0){
 			for(int i = 0; i < Constants.globalCache.transactions.size(); i++){
 				if(180 + i*70 - scrollOffset < Engine.getHeight() && 180 + i*70 - scrollOffset > 80){
 					g.drawImage(Images.getInterfaces()[6], 
@@ -279,7 +279,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 			//DCR and Balance
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.dcrFont);
-			g.drawString(Constants.dcrLabel, Engine.getWidth() / 2, 100);
+			g.drawString(Constants.getLangValue("DCR-Label"), Engine.getWidth() / 2, 100);
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
@@ -289,9 +289,9 @@ public class Wallet extends Interface implements MouseWheelListener {
 			//Available, Pending and Locked
 			g.setColor(Constants.labelColor);
 			g.setFont(Constants.labelFont);
-			g.drawString(Constants.availableLabel, Engine.getWidth() - (headerThird * 3), 125);
-			g.drawString(Constants.pendingLabel, Engine.getWidth() - (headerThird * 2), 125);
-			g.drawString(Constants.lockedLabel, Engine.getWidth() - (headerThird * 1), 125);
+			g.drawString(Constants.getLangValue("Available-Label"), Engine.getWidth() - (headerThird * 3), 125);
+			g.drawString(Constants.getLangValue("Pending-Label"), Engine.getWidth() - (headerThird * 2), 125);
+			g.drawString(Constants.getLangValue("Locked-Label"), Engine.getWidth() - (headerThird * 1), 125);
 			
 			g.setColor(Constants.walletBalanceColor);
 			g.setFont(Constants.walletBalanceFont);

@@ -40,6 +40,7 @@ public class Logs extends Interface implements MouseWheelListener {
 	
 	@Override
 	public void render(Graphics2D g) {
+		Constants.getLangValue("Old-Passphrase-Label");
 		//Second nav
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 
@@ -72,9 +73,9 @@ public class Logs extends Interface implements MouseWheelListener {
 		
 		g.setFont(Constants.settingsFont);
 		g.setColor(Constants.walletBalanceColor);
-		g.drawString(Constants.daemonButtonText, 40, 105);
-		g.drawString(Constants.walletButtonText, 215, 105);
-		g.drawString(Constants.guiButtonText, 405, 105);
+		g.drawString(Constants.getLangValue("Daemon-Button-Text"), 40, 105);
+		g.drawString(Constants.getLangValue("Wallet-Button-Text"), 215, 105);
+		g.drawString(Constants.getLangValue("GUI-Button-Text"), 405, 105);
 		
 		
 		//Content box

@@ -75,6 +75,7 @@ public class GlobalCache extends Thread implements Updatable {
 		
 		//Peer update
 		if(peerTimer.isUp() || forceUpdatePeers){
+			Api.ping();
 			peers = Api.getPeerInfo();
 			Constants.guiInterfaces.get(6).resize();
 			

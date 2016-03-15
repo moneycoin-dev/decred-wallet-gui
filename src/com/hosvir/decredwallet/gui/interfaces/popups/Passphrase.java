@@ -24,8 +24,8 @@ public class Passphrase extends Interface {
 		passphrase.textHidden = true;
 		
 		this.components.add(passphrase);
-		this.components.add(new Button("cancel", Constants.cancelButtonText, 30, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 130, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 30, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatRed, Constants.flatRedHover));
+		this.components.add(new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 130, (Engine.getHeight() / 2) + 50, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 	}
 	
 	public void update(long delta) {
@@ -72,7 +72,7 @@ public class Passphrase extends Interface {
 		g.setFont(Constants.labelFont);
 		g.setColor(Constants.labelColor);
 		
-		g.drawString(Constants.enterPassphraseMessage, (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.enterPassphraseMessage) / 2), Engine.getHeight() / 2 - 30);
+		g.drawString(Constants.getLangValue("Enter-Passphrase-Message"), (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Enter-Passphrase-Message")) / 2), Engine.getHeight() / 2 - 30);
 		
 		
 		//Render

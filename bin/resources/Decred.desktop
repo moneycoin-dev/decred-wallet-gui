@@ -7,5 +7,5 @@ Icon=decred
 Exec=decred
 Terminal=false
 Categories=Internet;
-MimeType=text/plain;text/html;application/x-java-archive;application/java-archive;application/x-jar;
+MimeType=
 StartupNotify=true

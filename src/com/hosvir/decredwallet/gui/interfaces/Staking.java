@@ -27,9 +27,9 @@ public class Staking extends Interface {
 	public void init() {
 		headerThird = Engine.getWidth() / 6;
 		
-		this.components.add(new Label("from", Constants.fromLabel, 40, 190));
-		this.components.add(new Label("limit", Constants.limitLabel, 40, 240));
-		this.components.add(new Label("address", Constants.addressLabel, 40, 290));
+		this.components.add(new Label("from", Constants.getLangValue("From-Label"), 40, 190));
+		this.components.add(new Label("limit", Constants.getLangValue("Limit-Label"), 40, 240));
+		this.components.add(new Label("address", Constants.getLangValue("Address-Label"), 40, 290));
 		
 		InputBox from = new InputBox("fromInput", 250, 170, Engine.getWidth() - 295, 30);
 		from.text = "default";
@@ -39,8 +39,8 @@ public class Staking extends Interface {
 		this.components.add(new InputBox("limitInput", 250, 220, Engine.getWidth() - 295, 30));
 		this.components.add(new InputBox("addressInput", 250, 270, Engine.getWidth() - 295, 30));
 		
-		this.components.add(new Button("cancel", Constants.cancelButtonText, 40, 320, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.confirmButtonText, Engine.getWidth() - 140, 320, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		this.components.add(new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 40, 320, 100, 35, Constants.flatRed, Constants.flatRedHover));
+		this.components.add(new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 140, 320, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 		
 		this.components.add(new Dialog("errordiag", ""));
 	}
@@ -68,7 +68,7 @@ public class Staking extends Interface {
 						
 						if(result.contains("not enough to purchase sstx")){
 							Constants.log("Insufficient funds: " + result);
-							getComponentByName("errordiag").text = Constants.insufficientFundsError;
+							getComponentByName("errordiag").text = Constants.getLangValue("Insufficient-Funds-Error");
 							
 							//Show dialog
 							this.blockInput = true;
@@ -118,12 +118,12 @@ public class Staking extends Interface {
 		//Draw info
 		g.setColor(Constants.labelColor);
 		g.setFont(Constants.labelFont);
-		g.drawString("Pool", headerThird - (headerThird / 2) - (g.getFontMetrics().stringWidth("Pool") / 2), 90);
-		g.drawString("Price", (headerThird * 2) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Price") / 2), 90);
-		g.drawString("Tickets", (headerThird * 3) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Tickets") / 2), 90);
-		g.drawString("Voted", (headerThird * 4) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Voted") / 2), 90);
-		g.drawString("Missed", (headerThird * 5) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Missed") / 2), 90);
-		g.drawString("Revoked", (headerThird * 6) - (headerThird / 2) - (g.getFontMetrics().stringWidth("Revoked") / 2), 90);
+		g.drawString(Constants.getLangValue("Pool-Label"), headerThird - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Pool-Label")) / 2), 90);
+		g.drawString(Constants.getLangValue("Price-Label"), (headerThird * 2) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Price-Label")) / 2), 90);
+		g.drawString(Constants.getLangValue("Tickets-Label"), (headerThird * 3) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Tickets-Label")) / 2), 90);
+		g.drawString(Constants.getLangValue("Voted-Label"), (headerThird * 4) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Voted-Label")) / 2), 90);
+		g.drawString(Constants.getLangValue("Missed-Label"), (headerThird * 5) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Missed-Label")) / 2), 90);
+		g.drawString(Constants.getLangValue("Revoked-Label"), (headerThird * 6) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.getLangValue("Revoked-Label")) / 2), 90);
 		
 		if(Constants.globalCache.stakeInfo != null && Constants.globalCache.stakeInfo.size() > 0){
 			g.setColor(Constants.walletBalanceColor);
