@@ -55,6 +55,10 @@ ___
   * Gui log
 * Language
   * Supports multiple languge though conf files
+* Security
+  * Dump private key
+  * Change passphrase
+  * Get master public key
 * Network 
   * Network info
   * Peers list
