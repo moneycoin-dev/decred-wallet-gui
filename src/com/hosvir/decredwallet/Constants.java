@@ -135,8 +135,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.7-beta";
-		buildDate = "15/03/2016";
+		version = "0.0.8-beta";
+		buildDate = "05/05/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -494,7 +494,7 @@ public class Constants {
 	 */
 	public static String getLangValue(String key) {
 		for(Map.Entry<String, String> e : langValues.entrySet()){
-			if(e.getKey().toLowerCase().contains(key.toLowerCase()))
+			if(e.getKey().toLowerCase().equals(key.toLowerCase()))
 				return e.getValue();
 		}
 		
@@ -694,6 +694,20 @@ public class Constants {
 		for(BaseGui b : guiInterfaces)
 			if(b != gui)
 				b.blockInput = block;
+	}
+	
+	//Temporary method to sort transactions by account until Decred implements this.
+	public static ArrayList<JsonObject> getTransactionsByAccount(String name) {
+		boolean isDefault = false;
+		if(Constants.accounts.get(0).name.trim().equals(name.trim())) isDefault = true;
+		ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
+		
+		for(JsonObject jo : Constants.globalCache.transactions){
+			if(jo.getValueByName("account").trim().equals(name.trim()) || (isDefault && jo.getValueByName("account").trim().length() == 0))
+				transactions.add(jo);
+		}
+			
+		return transactions;
 	}
 
 	public static String getVersion() {

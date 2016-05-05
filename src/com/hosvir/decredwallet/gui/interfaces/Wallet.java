@@ -95,8 +95,8 @@ public class Wallet extends Interface implements MouseWheelListener {
 			
 			
 			//Receive rectangles
-			if(txRectangles == null && Constants.globalCache.transactions.size() > 0){
-				txRectangles = new Rectangle[Constants.globalCache.transactions.size()];
+			if(txRectangles == null && Constants.accounts.get(selectedId).transactions.size() > 0){
+				txRectangles = new Rectangle[Constants.accounts.get(selectedId).transactions.size()];
 				
 				for(int i = 0; i < txRectangles.length; i++){
 					txRectangles[i] = new Rectangle((Engine.getWidth() / 2) - 150, 210 + i*70 - scrollOffset, 530,20);
@@ -110,7 +110,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 						txHoverId = i;
 		
 						if(Mouse.isMouseDown(MouseEvent.BUTTON1)){
-							Constants.setClipboardString(Constants.globalCache.transactions.get(txHoverId).getValueByName("txid").trim());
+							Constants.setClipboardString(Constants.accounts.get(selectedId).transactions.get(txHoverId).getValueByName("txid").trim());
 							getComponentByName("errordiag").text = Constants.getLangValue("Clipboard-Message") + ": " + Constants.getClipboardString();
 							
 							//Show dialog
@@ -131,8 +131,8 @@ public class Wallet extends Interface implements MouseWheelListener {
 	@Override
 	public void render(Graphics2D g) {
 		//Transactions
-		if(Constants.globalCache.transactions.size() > 1 && selectedId == 0){
-			for(int i = 0; i < Constants.globalCache.transactions.size(); i++){
+		if(Constants.accounts.get(selectedId).transactions.size() > 0){
+			for(int i = 0; i < Constants.accounts.get(selectedId).transactions.size(); i++){
 				if(180 + i*70 - scrollOffset < Engine.getHeight() && 180 + i*70 - scrollOffset > 80){
 					g.drawImage(Images.getInterfaces()[6], 
 							310, 
@@ -161,7 +161,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 							50,
 							null);
 					
-					switch(Constants.globalCache.transactions.get(i).getValueByName("category")){
+					switch(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("category")){
 					case "send":
 						g.setColor(Constants.flatRed);
 						break;
@@ -180,7 +180,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 					
 					
 					//Draw date
-					dateString = Constants.getWalletDate(Long.parseLong(Constants.globalCache.transactions.get(i).getValueByName("timereceived"))).split(":");
+					dateString = Constants.getWalletDate(Long.parseLong(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("timereceived"))).split(":");
 					g.setColor(Constants.walletBalanceColor);
 					g.setFont(Constants.walletBalanceFont);
 					g.drawString(dateString[0], 330, 212 + i*70 - scrollOffset);
@@ -192,27 +192,27 @@ public class Wallet extends Interface implements MouseWheelListener {
 					//Draw address
 					g.setColor(Constants.walletBalanceColor);
 					g.setFont(Constants.addressFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("address"), 
-							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("address")) / 2)) / 2, 
+					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address"), 
+							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address")) / 2)) / 2, 
 							204 + i*70 - scrollOffset);
 					
 					//Draw transaction
 					if(txHoverId == i) g.setColor(Constants.flatBlue); else g.setColor(Constants.labelColor);
 					g.setFont(Constants.transactionFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("txid"), 
-							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("txid")) / 2)) / 2, 
+					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("txid"), 
+							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("txid")) / 2)) / 2, 
 							226 + i*70 - scrollOffset);
 					
 					//Draw amount
 					g.setColor(Constants.walletBalanceColor);
 					g.setFont(Constants.walletBalanceFont);
-					g.drawString(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("amount").replace("-", "- "))), 212 + i*70 - scrollOffset);
+					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("amount").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("amount").replace("-", "- "))), 212 + i*70 - scrollOffset);
 					
 					//Draw tx fee
-					if(Constants.globalCache.transactions.get(i).getValueByName("fee") != null){
+					if(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("fee") != null){
 						g.setColor(Constants.labelColor);
 						g.setFont(Constants.transactionFont);
-						g.drawString(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.globalCache.transactions.get(i).getValueByName("fee").replace("-", "- "))), 226 + i*70 - scrollOffset);
+						g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("fee").replace("-", "- "), (Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("fee").replace("-", "- "))), 226 + i*70 - scrollOffset);
 					}
 				}
 			}
@@ -330,7 +330,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 			}
 			
 			if(scrollOffset < 0) scrollOffset = 0;
-			if(scrollOffset > (Constants.globalCache.transactions.size()-1)*70) scrollOffset = (Constants.globalCache.transactions.size()-1)*70;
+			if(scrollOffset > (Constants.accounts.get(selectedId).transactions.size()-1)*70) scrollOffset = (Constants.accounts.get(selectedId).transactions.size()-1)*70;
 			
 			txRectangles = null;
 		}

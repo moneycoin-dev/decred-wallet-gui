@@ -1,6 +1,5 @@
 package com.hosvir.decredwallet;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import com.hosvir.decredwallet.utils.Json;
@@ -50,8 +49,12 @@ public class Api {
 				" 0 all");
 	}
 	
-	public synchronized static ArrayList<JsonObject> getTransactions(String name) {
+	public synchronized static ArrayList<JsonObject> getTransactions() {
 		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet listtransactions"));
+	}
+	
+	public synchronized static ArrayList<JsonObject> getTransactions(String name) {
+		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet listtransactions " + Constants.getOsQuote() + name + Constants.getOsQuote()));
 	}
 	
 	public synchronized static ArrayList<JsonObject> getAccounts() {
@@ -59,11 +62,11 @@ public class Api {
 	}
 	
 	public synchronized static String getWalletFee() {
-		return String.valueOf(BigDecimal.valueOf(Double.valueOf(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getwalletfee").trim()) / 100000000));
+		return String.valueOf(Double.valueOf(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getwalletfee").trim()));
 	}
 	
 	public synchronized static String getStakeDifficulty() {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getstakedifficulty");
+		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getstakedifficulty")).get(0).getValueByName("current");
 	}
 	
 	public synchronized static String getAddressesByAccount(String name) {

@@ -55,8 +55,7 @@ public class GlobalCache extends Thread implements Updatable {
 	public void update(long delta) {
 		if(updateTimer.isUp() || forceUpdate){
 			walletFee = Api.getWalletFee();
-			transactions = Api.getTransactions(null);
-			
+			transactions = Api.getTransactions();
 			
 			if(updateTimer.timeLimit <= 100000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
 			updateTimer.reset();

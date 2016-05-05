@@ -1,7 +1,10 @@
 package com.hosvir.decredwallet;
 
+import java.util.ArrayList;
+
 import com.deadendgine.Updatable;
 import com.deadendgine.utils.Timer;
+import com.hosvir.decredwallet.utils.JsonObject;
 
 /**
  * 
@@ -18,7 +21,7 @@ public class Account extends Thread implements Updatable {
 	public String lockedBalance = "0";
 	public String totalBalance = "0";
 	public String[] addresses;
-	//public ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
+	public ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
 	
 	/**
 	 * Construct a new account.
@@ -55,6 +58,7 @@ public class Account extends Thread implements Updatable {
 			totalBalance = Api.getBalanceAll(name);
 			addresses = Api.getAddressesByAccount(name).split(",");
 			//transactions = Api.getTransactions(name);
+			transactions = Constants.getTransactionsByAccount(name);
 			
 			if(updateTimer.timeLimit <= 180000) updateTimer.timeLimit = Constants.getRandomNumber(100000, 180000);
 			updateTimer.reset();

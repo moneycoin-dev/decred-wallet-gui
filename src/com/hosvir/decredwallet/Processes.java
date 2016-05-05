@@ -50,7 +50,7 @@ public class Processes {
 	
 			//Try to kill all processes with the name
 			while(localCommand.execute("ps aux | awk '{print $2 }' | grep " + pid).length() > 0 && !processTimer.isUp()){
-				localCommand.execute("kill " + pid);
+				localCommand.execute("kill -2 " + pid); // -2 should send SIGINT and create a safe shutdown for DCRD
 			}
 			
 			//Return the results	
