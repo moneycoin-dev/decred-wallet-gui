@@ -135,8 +135,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.8-beta";
-		buildDate = "05/05/2016";
+		version = "0.0.9-beta";
+		buildDate = "08/05/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -178,7 +178,7 @@ public class Constants {
 		allowedPasswordClasses.add("com.hosvir.decredwallet.DecredWallet");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.Api");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Send");
-		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.SettingsSecurity");
+		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.SettingsSecurity");		
 		
 		langConfFiles.add("English.conf");
 		langConfFiles.add("Deutsch.conf");
@@ -263,15 +263,15 @@ public class Constants {
 			e.printStackTrace();
 		}
 		
-		daemonCommand = decredLocation + daemonBin + " -u " + osQuote + 
+		daemonCommand = osQuote + decredLocation + daemonBin + osQuote + " -u " + osQuote + 
 						daemonUsername + osQuote + " -P " + osQuote +
 						daemonPassword + osQuote + 
 						extraDaemonArguments;
-		walletCommand = decredLocation + walletBin + " -u " + osQuote +
+		walletCommand = osQuote + decredLocation + walletBin + osQuote + " -u " + osQuote +
 						daemonUsername + osQuote + " -P " + osQuote +
 						daemonPassword + osQuote + 
 						extraWalletArguments;
-		dcrctlBaseCommand = decredLocation + dcrctlBin + " -u " + osQuote +
+		dcrctlBaseCommand = osQuote + decredLocation + dcrctlBin + osQuote + " -u " + osQuote +
 						daemonUsername + osQuote + " -P " + osQuote +
 						daemonPassword + osQuote +
 						extraDcrctlArguments;
@@ -330,7 +330,15 @@ public class Constants {
 			
 			input.close();
 		}catch(Exception e){
-			//No contacts file
+			log("Unable to load contacts.");
+			
+			//Display error to user
+			JOptionPane.showMessageDialog(null, 
+					"Error: Unable to load contacts.",
+					"Decred Wallet",
+					JOptionPane.ERROR_MESSAGE);
+			
+			e.printStackTrace();
 		}
 	}
 
