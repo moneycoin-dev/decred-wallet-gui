@@ -73,6 +73,9 @@ public class DecredWallet {
 		
 		end = System.currentTimeMillis() - start; 
 		Constants.log("Loaded Daemon and Wallet in " + (end / 1000) + " seconds.");
+		
+		//Update Global cache
+		Constants.globalCache.forceUpdate = true;
 	}
 	
 	/**

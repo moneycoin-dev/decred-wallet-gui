@@ -257,8 +257,10 @@ public class Main extends BaseGame {
 		}else{
 			if(Constants.accounts.size() == 0){
 				for(JsonObject jo : Api.getAccounts())
-					for(JsonObjects jos : jo.getJsonObjects())
+					for(JsonObjects jos : jo.getJsonObjects()){
 						Constants.accounts.add(new Account(jos.getName()));
+						Constants.accountNames.add(jos.getName());
+					}
 				
 				Constants.globalCache.forceUpdateInfo = true;
 				Constants.globalCache.forceUpdatePeers = true;

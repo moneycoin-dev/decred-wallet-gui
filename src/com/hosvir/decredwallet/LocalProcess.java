@@ -40,10 +40,11 @@ public class LocalProcess extends Thread {
 			
 			if(Constants.getOS().contains("Linux")){
 	    		commands = new String[]{"/bin/sh","-c", command};
-	            process = new ProcessBuilder(commands).start();
 	    	}else if(Constants.getOS().contains("Windows")){
-	    		process = Runtime.getRuntime().exec("cmd /c " + command);
+	    		commands = new String[]{"cmd","/c", command};
 	    	}
+			
+			process = new ProcessBuilder(commands).start();
 	
 	        stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	        stdOut = new PrintWriter(process.getOutputStream());

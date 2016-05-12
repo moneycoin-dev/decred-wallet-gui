@@ -122,6 +122,7 @@ public class Constants {
 	private static Clipboard clipboard;
 	public static ArrayList<String> guiLog = new ArrayList<String>();
 	public static ArrayList<Account> accounts = new ArrayList<Account>();
+	public static ArrayList<String> accountNames = new ArrayList<String>();
 	public static ArrayList<BaseGui> guiInterfaces = new ArrayList<BaseGui>();
 	public static ArrayList<Contact> contacts = new ArrayList<Contact>();
 	public static ArrayList<String> langConfFiles = new ArrayList<String>();
@@ -135,8 +136,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.0.9-beta";
-		buildDate = "08/05/2016";
+		version = "0.1.0-beta";
+		buildDate = "12/05/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -685,10 +686,13 @@ public class Constants {
 		for(Account a : accounts) a.setRunning(false);
 		
 		accounts.clear();
+		accountNames.clear();
 		
 		for(JsonObject jo : Api.getAccounts())
-			for(JsonObjects jos : jo.getJsonObjects())
-				Constants.accounts.add(new Account(jos.getName()));
+			for(JsonObjects jos : jo.getJsonObjects()) {
+				accounts.add(new Account(jos.getName()));
+				accountNames.add(jos.getName());
+			}
 		
 		//Reset rectangles for interfaces
 		guiInterfaces.get(0).rectangles = null;

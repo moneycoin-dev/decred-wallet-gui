@@ -9,6 +9,7 @@ import com.hosvir.decredwallet.Constants;
 import com.hosvir.decredwallet.gui.Button;
 import com.hosvir.decredwallet.gui.Component;
 import com.hosvir.decredwallet.gui.Dialog;
+import com.hosvir.decredwallet.gui.DropdownBox;
 import com.hosvir.decredwallet.gui.Images;
 import com.hosvir.decredwallet.gui.InputBox;
 import com.hosvir.decredwallet.gui.Interface;
@@ -31,7 +32,7 @@ public class Staking extends Interface {
 		this.components.add(new Label("limit", Constants.getLangValue("Limit-Label"), 40, 240));
 		this.components.add(new Label("address", Constants.getLangValue("Address-Label"), 40, 290));
 		
-		InputBox from = new InputBox("fromInput", 250, 170, Engine.getWidth() - 295, 30);
+		DropdownBox from = new DropdownBox("langSelect", 250, 170, Engine.getWidth() - 295, 30, Constants.accountNames.toArray(new String[Constants.accountNames.size()]));
 		from.text = "default";
 		from.enabled = false;
 		
@@ -40,7 +41,11 @@ public class Staking extends Interface {
 		this.components.add(new InputBox("addressInput", 250, 270, Engine.getWidth() - 295, 30));
 		
 		this.components.add(new Button("cancel", Constants.getLangValue("Cancel-Button-Text"), 40, 320, 100, 35, Constants.flatRed, Constants.flatRedHover));
-		this.components.add(new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 140, 320, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
+		
+		Button confirmButton = new Button("confirm", Constants.getLangValue("Confirm-Button-Text"), Engine.getWidth() - 140, 320, 100, 35, Constants.flatBlue, Constants.flatBlueHover);
+		confirmButton.enabled = false;
+		
+		this.components.add(confirmButton);
 		
 		this.components.add(new Dialog("errordiag", ""));
 	}
@@ -49,9 +54,19 @@ public class Staking extends Interface {
 	public void update(long delta) {
 		super.update(delta);
 		
+		//Check if accounts are populated
+		if(DropdownBox.class.cast(this.getComponentByName("langSelect")).lineItems == null || DropdownBox.class.cast(this.getComponentByName("langSelect")).lineItems.length == 0){
+			DropdownBox.class.cast(this.getComponentByName("langSelect")).lineItems = Constants.accountNames.toArray(new String[Constants.accountNames.size()]);
+		}
+		
 		//For each component
 		for(Component c : components) {
 			if(c.containsMouse && c.enabled) Main.containsMouse = true;
+			
+			//Drop down
+			if(c instanceof DropdownBox) {
+				//c.selectedId = -1;
+			}
 			
 			//Buttons
 			if(c instanceof Button) {
@@ -75,6 +90,7 @@ public class Staking extends Interface {
 							Constants.navbar.blockInput = true;
 							getComponentByName("errordiag").selectedId = 0;
 						}else{
+							Constants.log("Stake result: " + result);
 							Constants.globalCache.forceUpdateInfo = true;
 						}
 						

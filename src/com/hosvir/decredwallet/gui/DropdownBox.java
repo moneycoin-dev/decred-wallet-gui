@@ -29,6 +29,7 @@ public class DropdownBox extends Component implements KeyListener {
 	 * @param y
 	 * @param width
 	 * @param height
+	 * @param lineItems
 	 */
 	public DropdownBox(String name, int x, int y, int width, int height, String[] lineItems) {
 		super(name, "", 3, x, y, width, height);
@@ -41,10 +42,12 @@ public class DropdownBox extends Component implements KeyListener {
 		this.selectedId = -1;
 		this.lineItems = lineItems;
 		
-		this.itemRectangles = new Rectangle[lineItems.length];
-		
-		for(int i = 0; i < lineItems.length; i++){
-			itemRectangles[i] = new Rectangle(x, y + ((i+1) * height), width, height);
+		if(lineItems != null){
+			this.itemRectangles = new Rectangle[lineItems.length];
+			
+			for(int i = 0; i < lineItems.length; i++){
+				itemRectangles[i] = new Rectangle(x, y + ((i+1) * height), width, height);
+			}
 		}
 		
 		Main.canvas.addKeyListener(this);
@@ -53,18 +56,25 @@ public class DropdownBox extends Component implements KeyListener {
 	@Override
 	public void update(long delta) {
 		if(isActive()){
-			if(itemRectangles != null)
-			for(int i = 0; i < itemRectangles.length; i++) {
-				if(itemRectangles[i].contains(Mouse.point)) {
-					containsMouse = true;
-					hoverItem = i;
-		 
-					if(Mouse.isMouseDown(MouseEvent.BUTTON1)) {
-						text = lineItems[i];
-						selectedItem = i;
-						selectedId = -1;
-						Mouse.release(MouseEvent.BUTTON1);
+			if(itemRectangles != null){
+				for(int i = 0; i < itemRectangles.length; i++) {
+					if(itemRectangles[i].contains(Mouse.point)) {
+						containsMouse = true;
+						hoverItem = i;
+			 
+						if(Mouse.isMouseDown(MouseEvent.BUTTON1)) {
+							text = lineItems[i];
+							selectedItem = i;
+							selectedId = -1;
+							Mouse.release(MouseEvent.BUTTON1);
+						}
 					}
+				}
+			}else if(lineItems != null && itemRectangles == null){
+				this.itemRectangles = new Rectangle[lineItems.length];
+				
+				for(int i = 0; i < lineItems.length; i++){
+					itemRectangles[i] = new Rectangle(x, y + ((i+1) * height), width, height);
 				}
 			}
 		}
@@ -119,13 +129,16 @@ public class DropdownBox extends Component implements KeyListener {
 		if(selectedId == 0){
 			//Draw line item strings
 			g.setFont(textFont);
-			for(int i = 0; i < lineItems.length; i++){
-				g.setColor(textColor);
-				g.drawString(lineItems[i].replace(".conf", ""), x + 10, y + (height /2 ) + 8 + ((i+1) * height));
-				
-				if(enabled && hoverItem == i) {
-					g.setColor(hoverColor);
-					g.drawRect(itemRectangles[i].x, itemRectangles[i].y, itemRectangles[i].width, itemRectangles[i].height);
+			
+			if(lineItems != null){
+				for(int i = 0; i < lineItems.length; i++){
+					g.setColor(textColor);
+					g.drawString(lineItems[i].replace(".conf", ""), x + 10, y + (height /2 ) + 8 + ((i+1) * height));
+					
+					if(enabled && hoverItem == i) {
+						g.setColor(hoverColor);
+						g.drawRect(itemRectangles[i].x, itemRectangles[i].y, itemRectangles[i].width, itemRectangles[i].height);
+					}
 				}
 			}
 		}
@@ -140,9 +153,11 @@ public class DropdownBox extends Component implements KeyListener {
 			r.height = height;
 		}
 		
-		for(Rectangle r : itemRectangles){
-			r.width = width;
-			r.height = height;
+		if(itemRectangles != null){
+			for(Rectangle r : itemRectangles){
+				r.width = width;
+				r.height = height;
+			}
 		}
 	}
 
