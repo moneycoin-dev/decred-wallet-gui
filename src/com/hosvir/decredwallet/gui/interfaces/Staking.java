@@ -187,12 +187,12 @@ public class Staking extends Interface {
 	
 	@Override
 	public void resize() {
-		getComponentByName("fromInput").width = Engine.getWidth() - 295;
+		getComponentByName("from").width = Engine.getWidth() - 295;
 		getComponentByName("limitInput").width = Engine.getWidth() - 295;
 		getComponentByName("addressInput").width = Engine.getWidth() - 295;
 		getComponentByName("confirm").x = Engine.getWidth() - 140;
-
-		getComponentByName("fromInput").resize();
+	
+		getComponentByName("from").resize();
 		getComponentByName("limitInput").resize();
 		getComponentByName("addressInput").resize();
 		getComponentByName("confirm").resize();

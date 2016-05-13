@@ -76,6 +76,8 @@ public class DecredWallet {
 		
 		//Update Global cache
 		Constants.globalCache.forceUpdate = true;
+		Constants.globalCache.forceUpdateInfo = true;
+		Constants.globalCache.forceUpdatePeers = true;
 	}
 	
 	/**
