@@ -16,7 +16,10 @@ rem Complie java files
 javac com/hosvir/decredwallet/DecredWallet.java -d ../bin/decred-wallet/
 
 rem Add files to jar
-jar cvfe ../bin/DecredWallet.jar com.hosvir.decredwallet.DecredWallet resources -C ../bin/decred-wallet/ .
+rem jar cvfe ../bin/DecredWallet.jar com.hosvir.decredwallet.DecredWallet resources -C ../bin/decred-wallet/ .
+
+rem Now using ANT for required jars
+ant -buildfile ../bin/resources/DecredWallet-ANTSCRIPT.xml
 
 rem Move into bin folder
 cd "../bin"

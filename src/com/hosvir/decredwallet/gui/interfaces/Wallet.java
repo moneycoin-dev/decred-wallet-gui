@@ -28,6 +28,10 @@ public class Wallet extends Interface implements MouseWheelListener {
 	private String[] dateString;
 	private Rectangle[] txRectangles;
 	private int txHoverId = -1;
+	private int scrollMinHeight = 160;
+	private int scrollMaxHeight;
+	private int scrollCurrentPosition = 160;
+	
 	
 	@Override
 	public void init() {
@@ -39,6 +43,8 @@ public class Wallet extends Interface implements MouseWheelListener {
 		errorDiag.width = 800;
 		errorDiag.resize();
 		this.components.add(errorDiag);
+		
+		scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
 		
 		Main.canvas.addMouseWheelListener(this);
 	}
@@ -85,7 +91,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 			}
 			
 			//Rename account
-			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("imported")){
+			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("default") && !Constants.accounts.get(selectedId).name.startsWith("imported")){
 				Constants.accountToRename = Constants.accounts.get(selectedId).name;
 				blockInput = true;
 				Constants.navbar.blockInput = true;
@@ -131,7 +137,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 	@Override
 	public void render(Graphics2D g) {
 		//Transactions
-		if(Constants.accounts.get(selectedId).transactions.size() > 0){
+		if(Constants.accounts.size() > 0 && Constants.accounts.get(selectedId).transactions.size() > 0){
 			for(int i = 0; i < Constants.accounts.get(selectedId).transactions.size(); i++){
 				if(180 + i*70 - scrollOffset < Engine.getHeight() && 180 + i*70 - scrollOffset > 80){
 					g.drawImage(Images.getInterfaces()[6], 
@@ -173,6 +179,11 @@ public class Wallet extends Interface implements MouseWheelListener {
 						break;
 					}
 					
+					//Pending
+					if(Integer.valueOf(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("confirmations")) < 1) {
+						g.setColor(Constants.flatBlue);
+					}
+					
 					g.fillRect(314, 
 							180 + i*70 - scrollOffset, 
 							5,
@@ -189,12 +200,20 @@ public class Wallet extends Interface implements MouseWheelListener {
 					g.setFont(Constants.transactionFont);
 					g.drawString(dateString[1].replaceAll("!", ":"), 322, 226 + i*70 - scrollOffset);
 					
+					//Draw confirmations
+					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("confirmations"), 322, 196 + i*70 - scrollOffset);
+					
+					//TX TYPE
+					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("txtype"), Engine.getWidth() - 30 - g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("txtype")), 196 + i*70 - scrollOffset);
+					
 					//Draw address
 					g.setColor(Constants.walletBalanceColor);
 					g.setFont(Constants.addressFont);
-					g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address"), 
-							(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address")) / 2)) / 2, 
-							204 + i*70 - scrollOffset);
+					if(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address") != null){
+						g.drawString(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address"), 
+								(Engine.getWidth() - (g.getFontMetrics().stringWidth(Constants.accounts.get(selectedId).transactions.get(i).getValueByName("address")) / 2)) / 2, 
+								204 + i*70 - scrollOffset);
+					}
 					
 					//Draw transaction
 					if(txHoverId == i) g.setColor(Constants.flatBlue); else g.setColor(Constants.labelColor);
@@ -216,6 +235,13 @@ public class Wallet extends Interface implements MouseWheelListener {
 					}
 				}
 			}
+		}
+		
+		//Scroll bar
+		if(Constants.accounts.size() > 0 && Constants.accounts.get(selectedId).transactions.size() > 0) {
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawLine(Engine.getWidth() - 10, 100, Engine.getWidth() - 10, Engine.getHeight());
+			g.fillRect(Engine.getWidth() - 10, scrollCurrentPosition, 10, 60);
 		}
 		
 		//Header
@@ -271,7 +297,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 				//Wallet Balance
 				g.setColor(Constants.walletBalanceColor);
 				g.setFont(Constants.walletBalanceFont);
-				g.drawString("" + Constants.accounts.get(i).balance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).balance), 98 + i*60);
+				g.drawString("" + Constants.accounts.get(i).totalBalance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).totalBalance), 98 + i*60);
 			}
 		}
 		
@@ -283,7 +309,7 @@ public class Wallet extends Interface implements MouseWheelListener {
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
-			g.drawString(Constants.accounts.get(selectedId).balance, (Engine.getWidth() + 150) / 2, 100);
+			g.drawString(Constants.accounts.get(selectedId).totalBalance, (Engine.getWidth() + 150) / 2, 100);
 			
 			
 			//Available, Pending and Locked
@@ -309,8 +335,10 @@ public class Wallet extends Interface implements MouseWheelListener {
 		txRectangles = null;
 		headerThird = (Engine.getWidth() - 200) / 4;
 		
-		getComponentByName("add").y = Engine.getHeight() - 80;
-		getComponentByName("add").resize();
+		if(getComponentByName("add") != null) {
+			getComponentByName("add").y = Engine.getHeight() - 80;
+			getComponentByName("add").resize();
+		}
 		
 		super.resize();
 	}
@@ -324,13 +352,23 @@ public class Wallet extends Interface implements MouseWheelListener {
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if(isActive()){
 			if(e.getUnitsToScroll() > 0){
-				scrollOffset += Constants.scrollDistance;
+				scrollOffset += 70;
+				if(Constants.accounts.get(selectedId).transactions.size() > 0)
+				scrollCurrentPosition += (Engine.getHeight() - scrollMinHeight - 60) / (Constants.accounts.get(selectedId).transactions.size() -1);
 			}else{
-				scrollOffset -= Constants.scrollDistance;
+				scrollOffset -= 70;
+				if(Constants.accounts.get(selectedId).transactions.size() > 0)
+				scrollCurrentPosition -= (Engine.getHeight() - scrollMinHeight - 60) / (Constants.accounts.get(selectedId).transactions.size() -1);
 			}
 			
 			if(scrollOffset < 0) scrollOffset = 0;
 			if(scrollOffset > (Constants.accounts.get(selectedId).transactions.size()-1)*70) scrollOffset = (Constants.accounts.get(selectedId).transactions.size()-1)*70;
+			
+			if(Constants.accounts.get(selectedId).transactions.size() > 0){
+				scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
+				if(scrollCurrentPosition < scrollMinHeight) scrollCurrentPosition = scrollMinHeight;
+				if(scrollCurrentPosition > scrollMaxHeight) scrollCurrentPosition = scrollMaxHeight;
+			}
 			
 			txRectangles = null;
 		}

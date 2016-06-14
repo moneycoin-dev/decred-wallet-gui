@@ -17,10 +17,16 @@ fi
 cd ../src
 
 #Complie java files
-javac com/hosvir/decredwallet/DecredWallet.java -d ../bin/decred-wallet/
+javac -cp ../bin/libraries/*:. com/hosvir/decredwallet/DecredWallet.java -d ../bin/decred-wallet/
+
+#Copy resources to working dir
+cp -R resources ../bin/decred-wallet/
 
 #Add files to jar
-jar cvfe ../bin/DecredWallet.jar com.hosvir.decredwallet.DecredWallet resources -C ../bin/decred-wallet/ .
+#jar cvfe ../bin/DecredWallet.jar com.hosvir.decredwallet.DecredWallet resources -C ../bin/decred-wallet/ .
+
+#Now using ANT for required jars
+ant -buildfile ../bin/resources/DecredWallet-ANTSCRIPT.xml
 
 #Move into bin folder
 cd ../bin

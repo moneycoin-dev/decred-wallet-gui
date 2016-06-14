@@ -27,7 +27,7 @@ import com.hosvir.decredwallet.gui.Main;
  */
 public class Send extends Interface {
 	private int headerThird;
-	private boolean readyToSend;
+	private boolean readyToSend, sendMany;
 	private ArrayList<String> suggestions;
 	private int hoverSuggestionId;
 	private String to;
@@ -61,6 +61,7 @@ public class Send extends Interface {
 		this.components.add(cancel);
 		this.components.add(send);
 		this.components.add(new Dialog("errordiag", ""));
+		this.getComponentByName("errordiag").width = 800;
 	}
 
 	@Override
@@ -96,7 +97,7 @@ public class Send extends Interface {
 			
 			
 			//Check for sending
-			if(Constants.getPrivatePassPhrase() != null && getComponentByName("to").text != "") {
+			if(Constants.isPrivatePassphraseSet() && getComponentByName("to").text != "") {
 				if(getComponentByName("fee").text != String.valueOf(Api.getWalletFee())){
 					if(Api.setTxFee(getComponentByName("fee").text)){
 						readyToSend = true;
@@ -111,22 +112,38 @@ public class Send extends Interface {
 					//Check if sending to contact
 					if(Constants.isContact(getComponentByName("to").text)){
 						to = Constants.getContact(getComponentByName("to").text).getAddress();
+					}else if(getComponentByName("to").text.contains(",")){
+						sendMany = true;
+						to = getComponentByName("to").text;
 					}else{
 						to = getComponentByName("to").text;
 					}
 					
 					//Unlock wallet
 					String unlock = Api.unlockWallet("30");
+					System.out.println("UNLOCK: " + unlock);
 					
-					if(unlock == null | unlock.trim().length() < 1){
-						String txId = Api.sendFrom(getComponentByName("from").text, 
-								to, 
-								getComponentByName("comment").text, 
-								getComponentByName("amount").text);
+					if(unlock != null){
+						String txId = null;
+						
+						if(sendMany) {
+							Constants.log("Send many is not yet supported.");
+							getComponentByName("errordiag").text = "Send many is not yet supported.";
+							
+							//Show dialog
+							this.blockInput = true;
+							Constants.navbar.blockInput = true;
+							getComponentByName("errordiag").selectedId = 0;
+						}else {
+							txId = Api.sendFrom(getComponentByName("from").text, 
+									to, 
+									getComponentByName("comment").text, 
+									getComponentByName("amount").text);
+						}
 						
 						if(txId == ""){
 							Constants.log("Unable to send DCR. " + txId);
-						}else if(txId.contains("insufficient funds")){
+						}else if(txId.contains("-32603")){
 							Constants.log("Insufficient funds: " + txId);
 							getComponentByName("errordiag").text = Constants.getLangValue("Insufficient-Funds-Error");
 							
@@ -142,6 +159,8 @@ public class Send extends Interface {
 							this.blockInput = true;
 							Constants.navbar.blockInput = true;
 							getComponentByName("errordiag").selectedId = 0;
+							
+							Constants.accounts.get(selectedId).forceUpdate = true;
 						}
 					}else{
 						Constants.log("Error: " + unlock);
@@ -165,6 +184,7 @@ public class Send extends Interface {
 				
 				//Reset form
 				resetForm();
+				sendMany = false;
 			}
 		
 			//For each component
@@ -229,7 +249,7 @@ public class Send extends Interface {
 		
 			
 			//Rename account
-			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("imported")){
+			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("default") && !Constants.accounts.get(selectedId).name.startsWith("imported")){
 				Constants.accountToRename = Constants.accounts.get(selectedId).name;
 				blockInput = true;
 				Constants.navbar.blockInput = true;
@@ -293,7 +313,7 @@ public class Send extends Interface {
 				//Wallet Balance
 				g.setColor(Constants.walletBalanceColor);
 				g.setFont(Constants.walletBalanceFont);
-				g.drawString("" + Constants.accounts.get(i).balance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).balance), 98 + i*60);
+				g.drawString("" + Constants.accounts.get(i).totalBalance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).totalBalance), 98 + i*60);
 			}
 		}
 		
@@ -305,7 +325,7 @@ public class Send extends Interface {
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
-			g.drawString("" + Constants.accounts.get(selectedId).balance, (Engine.getWidth() + 150) / 2, 100);
+			g.drawString("" + Constants.accounts.get(selectedId).totalBalance, (Engine.getWidth() + 150) / 2, 100);
 			
 			
 			//Available, Pending and Locked
@@ -410,7 +430,7 @@ public class Send extends Interface {
 
 	@Override
 	public boolean isActive() {
-		return Constants.navbar.selectedId == 3;
+		return Constants.navbar.selectedId == 5;
 	}
 	
 	/**

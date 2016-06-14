@@ -40,7 +40,6 @@ public class Logs extends Interface implements MouseWheelListener {
 	
 	@Override
 	public void render(Graphics2D g) {
-		Constants.getLangValue("Old-Passphrase-Label");
 		//Second nav
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 
@@ -73,9 +72,9 @@ public class Logs extends Interface implements MouseWheelListener {
 		
 		g.setFont(Constants.settingsFont);
 		g.setColor(Constants.walletBalanceColor);
-		g.drawString(Constants.getLangValue("Daemon-Button-Text"), 40, 105);
-		g.drawString(Constants.getLangValue("Wallet-Button-Text"), 215, 105);
-		g.drawString(Constants.getLangValue("GUI-Button-Text"), 405, 105);
+		g.drawString(Constants.getLangValue("Daemon-Button-Text"), 170 - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("Daemon-Button-Text")) / 2), 105);
+		g.drawString(Constants.getLangValue("Wallet-Button-Text"), (170 * 2) - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("Wallet-Button-Text")) / 2), 105);
+		g.drawString(Constants.getLangValue("GUI-Button-Text"), (170 * 3) - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("GUI-Button-Text")) / 2), 105);
 		
 		
 		//Content box
@@ -114,17 +113,17 @@ public class Logs extends Interface implements MouseWheelListener {
 		if(daemonStartLine > -1){
 			switch(selectedId){
 			case 0:
-				if(Constants.getDaemonProcess() != null && Constants.getDaemonProcess().log != null)
+				if(Constants.getDcrdEndpoint() != null)
 				for(int i = daemonStartLine; i < daemonEndLine; i++){
-					if(i < Constants.getDaemonProcess().log.size())
-						g.drawString(Constants.getDaemonProcess().log.get(i), 40, 175 + (i - daemonStartLine)*18);
+					if(i < Constants.getDcrdEndpoint().log.size())
+						g.drawString(Constants.getDcrdEndpoint().log.get(i), 40, 175 + (i - daemonStartLine)*18);
 				}
 				break;
 			case 1:
-				if(Constants.getWalletProcess() != null)
+				if(Constants.getDcrwalletEndpoint() != null)
 				for(int i = walletStartLine; i < walletEndLine; i++){
-					if(i < Constants.getWalletProcess().log.size())
-						g.drawString(Constants.getWalletProcess().log.get(i), 40, 175 + (i - walletStartLine)*18);
+					if(i < Constants.getDcrwalletEndpoint().log.size())
+						g.drawString(Constants.getDcrwalletEndpoint().log.get(i), 40, 175 + (i - walletStartLine)*18);
 				}
 				break;
 			case 2:
@@ -139,11 +138,11 @@ public class Logs extends Interface implements MouseWheelListener {
 	
 	@Override
 	public void resize() {
-		if(Constants.getDaemonProcess() != null && Constants.getWalletProcess() != null){
+		if(Constants.getDcrdEndpoint() != null && Constants.getDcrwalletEndpoint() != null){
 			maxLines = (Engine.getHeight() - 220) / 18;
 			
-			daemonStartLine = Constants.getDaemonProcess().log.size() - maxLines;
-			walletStartLine = Constants.getWalletProcess().log.size() - maxLines;
+			daemonStartLine = Constants.getDcrdEndpoint().log.size() - maxLines;
+			walletStartLine = Constants.getDcrwalletEndpoint().log.size() - maxLines;
 			guiStartLine = Constants.guiLog.size() - maxLines;
 			daemonEndLine = daemonStartLine + maxLines;
 			walletEndLine = walletStartLine + maxLines;
@@ -152,8 +151,8 @@ public class Logs extends Interface implements MouseWheelListener {
 			if(daemonStartLine < 0) daemonStartLine = 0;
 			if(walletStartLine < 0) walletStartLine = 0;
 			if(guiStartLine < 0) guiStartLine = 0;
-			if(daemonEndLine > Constants.getDaemonProcess().log.size() | daemonEndLine < maxLines) daemonEndLine = Constants.getDaemonProcess().log.size();
-			if(walletEndLine > Constants.getWalletProcess().log.size() | walletEndLine < maxLines) walletEndLine = Constants.getWalletProcess().log.size();
+			if(daemonEndLine > Constants.getDcrdEndpoint().log.size() | daemonEndLine < maxLines) daemonEndLine = Constants.getDcrdEndpoint().log.size();
+			if(walletEndLine > Constants.getDcrwalletEndpoint().log.size() | walletEndLine < maxLines) walletEndLine = Constants.getDcrwalletEndpoint().log.size();
 			if(guiEndLine > Constants.guiLog.size() | guiEndLine < maxLines) guiEndLine = Constants.guiLog.size();
 		}
 	}
@@ -174,10 +173,10 @@ public class Logs extends Interface implements MouseWheelListener {
 					daemonStartLine -= e.getScrollAmount();
 				}
 				
-				if(daemonStartLine > Constants.getDaemonProcess().log.size()) daemonStartLine = Constants.getDaemonProcess().log.size()-1;
+				if(daemonStartLine > Constants.getDcrdEndpoint().log.size()) daemonStartLine = Constants.getDcrdEndpoint().log.size()-1;
 				if(daemonStartLine < 0) daemonStartLine = 0;
 				daemonEndLine = daemonStartLine + maxLines;
-				if(daemonEndLine > Constants.getDaemonProcess().log.size()) daemonEndLine = Constants.getDaemonProcess().log.size();
+				if(daemonEndLine > Constants.getDcrdEndpoint().log.size()) daemonEndLine = Constants.getDcrdEndpoint().log.size();
 				break;
 			case 1:
 				if(e.getUnitsToScroll() > 0){
@@ -186,10 +185,10 @@ public class Logs extends Interface implements MouseWheelListener {
 					walletStartLine -= e.getScrollAmount();
 				}
 				
-				if(walletStartLine > Constants.getWalletProcess().log.size()) walletStartLine = Constants.getWalletProcess().log.size()-1;
+				if(walletStartLine > Constants.getDcrwalletEndpoint().log.size()) walletStartLine = Constants.getDcrwalletEndpoint().log.size()-1;
 				if(walletStartLine < 0) walletStartLine = 0;
 				walletEndLine = walletStartLine + maxLines;
-				if(walletEndLine > Constants.getWalletProcess().log.size()) walletEndLine = Constants.getWalletProcess().log.size();
+				if(walletEndLine > Constants.getDcrwalletEndpoint().log.size()) walletEndLine = Constants.getDcrwalletEndpoint().log.size();
 				break;
 			case 2:
 				if(e.getUnitsToScroll() > 0){

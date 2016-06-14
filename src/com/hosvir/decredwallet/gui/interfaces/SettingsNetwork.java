@@ -22,6 +22,9 @@ import com.hosvir.decredwallet.gui.Main;
 public class SettingsNetwork extends Interface implements MouseWheelListener {
 	private int headerThird;
 	private int scrollOffset = 0;
+	private int scrollMinHeight = 130;
+	private int scrollMaxHeight;
+	private int scrollCurrentPosition = 130;
 	
 	@Override
 	public void init() {
@@ -29,6 +32,8 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 		
 		this.components.add(new Dialog("errordiag", Constants.getLangValue("Disconnected-Peer-Message")));
 		selectedId = -1;
+		
+		scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
 		
 		Main.canvas.addMouseWheelListener(this);
 	}
@@ -72,8 +77,8 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 	
 	@Override
 	public synchronized void render(Graphics2D g) {
-		if(Constants.globalCache.peers != null)
-			for(int i = 0; i < Constants.globalCache.peers.size(); i++) {
+		if(Constants.globalCache.peers != null) {
+			for(int i = 0; i < Constants.globalCache.peers.size()-2; i++) {
 				if(150 + i*70 - scrollOffset < Engine.getHeight() && 150 + i*70 - scrollOffset > 80 && Constants.globalCache.peers.get(i).getValueByName("addr") != null){
 					g.drawImage(Images.getInterfaces()[6], 
 							20, 
@@ -136,8 +141,7 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 					g.setColor(Constants.labelColor);
 					g.setFont(Constants.transactionFont);
 					if(Constants.globalCache.peers.get(i).getValueByName("subver").split("/").length > 1)
-					g.drawString(Constants.globalCache.peers.get(i).getValueByName("subver").split("/")[2].split("dcrd:")[1], (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.peers.get(i).getValueByName("currentheight")) / 2), 271 + i*70 - scrollOffset);
-					
+					g.drawString(Constants.globalCache.peers.get(i).getValueByName("subver").split("/")[2].split("dcrd:")[1], (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.peers.get(i).getValueByName("currentheight")) / 2), 271 + i*70 - scrollOffset);					
 					
 					//Receive
 					g.setColor(Constants.walletBalanceColor);
@@ -156,6 +160,15 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 					g.drawString(Constants.formatDate(Long.parseLong(Constants.globalCache.peers.get(i).getValueByName("lastsend"))), Engine.getWidth() - 400, 267 + i*70 - scrollOffset);
 				}
 			}
+		}
+		
+		//Scroll bar
+		if(Constants.globalCache.peers.size()-2 > 0) {
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawLine(Engine.getWidth() - 10, 130, Engine.getWidth() - 10, Engine.getHeight());
+			g.fillRect(Engine.getWidth() - 10, scrollCurrentPosition, 10, 60);
+		}
+		
 		
 		//Content box
 		g.drawImage(Images.getInterfaces()[6], 
@@ -185,7 +198,6 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 				60,
 				null);
 		
-		
 		//Available, Pending and Locked
 		g.setColor(Constants.labelColor);
 		g.setFont(Constants.labelFont);
@@ -197,7 +209,7 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 		g.setFont(Constants.walletBalanceFont);
 		g.drawString(Constants.globalCache.info.get(0).getValueByName("blocks"), headerThird - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.info.get(0).getValueByName("blocks")) / 2), 190);
 		g.drawString(Constants.globalCache.info.get(0).getValueByName("difficulty"), (headerThird * 2) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.info.get(0).getValueByName("difficulty")) / 2), 190);
-		g.drawString(Constants.globalCache.peers.size() + "", (headerThird * 3) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.peers.size() + "") / 2), 190);
+		g.drawString(Constants.globalCache.peers.size()-3 + "", (headerThird * 3) - (headerThird / 2) - (g.getFontMetrics().stringWidth(Constants.globalCache.peers.size()-3 + "") / 2), 190);
 		
 		//Render
 		super.render(g);
@@ -208,26 +220,37 @@ public class SettingsNetwork extends Interface implements MouseWheelListener {
 		rectangles = null;
 		
 		headerThird = Engine.getWidth() / 3;
+		scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
 		
 		super.resize();
 	}
 
 	@Override
 	public boolean isActive() {
-		return Constants.navbar.selectedId == 0 && Constants.guiInterfaces.get(6).selectedId == 2;
+		return Constants.navbar.selectedId == 0 && Constants.guiInterfaces.get(9).selectedId == 2;
 	}
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if(isActive()){
 			if(e.getUnitsToScroll() > 0){
-				scrollOffset += Constants.scrollDistance;
+				scrollOffset += 70;
+				if(Constants.globalCache.peers.size()-2 > 0)
+				scrollCurrentPosition += (Engine.getHeight() - scrollMinHeight - 60) / (Constants.globalCache.peers.size()-3);
 			}else{
-				scrollOffset -= Constants.scrollDistance;
+				scrollOffset -= 70;
+				if(Constants.globalCache.peers.size()-2 > 0)
+				scrollCurrentPosition -= (Engine.getHeight() - scrollMinHeight - 60) / (Constants.globalCache.peers.size()-3);
 			}
 			
 			if(scrollOffset < 0) scrollOffset = 0;
-			if(scrollOffset > (Constants.globalCache.peers.size()-1)*70) scrollOffset = (Constants.globalCache.peers.size()-1)*70;
+			if(scrollOffset > (Constants.globalCache.peers.size()-1)*70) scrollOffset = (Constants.globalCache.peers.size()-3)*70;
+			
+			if(Constants.globalCache.peers.size()-2 > 0){
+				scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
+				if(scrollCurrentPosition < scrollMinHeight) scrollCurrentPosition = scrollMinHeight;
+				if(scrollCurrentPosition > scrollMaxHeight) scrollCurrentPosition = scrollMaxHeight;
+			}
 			
 			rectangles = null;
 		}

@@ -61,7 +61,7 @@ public class SettingsSecurity extends Interface {
 			super.update(delta);
 			
 			//Check for dump private key
-			if(Constants.getPrivatePassPhrase() != null && getComponentByName("addressInput").text != "") {
+			if(Constants.isPrivatePassphraseSet() && getComponentByName("addressInput").text != "") {
 				//Unlock wallet
 				String unlock = Api.unlockWallet("30");
 					
@@ -222,7 +222,7 @@ public class SettingsSecurity extends Interface {
 
 	@Override
 	public boolean isActive() {
-		return Constants.navbar.selectedId == 0 && Constants.guiInterfaces.get(6).selectedId == 1;
+		return Constants.navbar.selectedId == 0 && Constants.guiInterfaces.get(9).selectedId == 1;
 	}
 
 }

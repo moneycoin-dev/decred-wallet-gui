@@ -1,6 +1,7 @@
 package com.hosvir.decredwallet;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,10 +33,10 @@ import com.hosvir.decredwallet.utils.FileUtils;
 import com.hosvir.decredwallet.utils.FileWriter;
 import com.hosvir.decredwallet.utils.JsonObject;
 import com.hosvir.decredwallet.utils.JsonObjects;
+import com.hosvir.decredwallet.utils.Keystore;
+import com.hosvir.decredwallet.websockets.DecredEndpoint;
 
 /**
- * 
- * Constant fields to be used throughout the program.
  * 
  * @author Troy
  * 
@@ -43,6 +45,7 @@ public class Constants {
 	private static String version;
 	private static String buildDate;
 	private static String userHome;
+	private static String keystore;
 	private static String decredLocation;
 	private static String daemonBin;
 	private static String walletBin;
@@ -51,6 +54,7 @@ public class Constants {
 	private static String daemonPassword;
 	private static String publicPassPhrase;
 	private static String privatePassPhrase;
+	private static String keystorePassword;
 	private static String extraDaemonArguments;
 	private static String extraWalletArguments;
 	private static String extraDcrctlArguments;
@@ -60,6 +64,12 @@ public class Constants {
 	private static String daemonCommand;
 	private static String walletCommand;
 	private static String dcrctlBaseCommand;
+	private static String rpcProtocol;
+	private static String rpcProtocolEnd;
+	private static String rpcDaemonIp;
+	private static String rpcWalletIp;
+	private static String rpcDaemonPort;
+	private static String rpcWalletPort;
 	private static File settingsFile;
 	private static File langFolder;
 	private static File dcrdCert;
@@ -67,6 +77,7 @@ public class Constants {
 	
 	private static boolean enableOpenGL;
 	private static boolean enableFps;
+	private static boolean debug;
 	
 	private static ArrayList<String> allowedPasswordClasses;
 	
@@ -80,7 +91,9 @@ public class Constants {
 	
 	private static LocalProcess daemonProcess;
 	private static LocalProcess walletProcess;
-	private static boolean daemonReady, walletReady, requirePublicPass, testnet;
+	private static DecredEndpoint dcrdEndpoint;
+	private static DecredEndpoint dcrwalletEndpoint;
+	private static boolean daemonProcessReady, walletProcessReady, daemonReady, walletReady, requirePublicPass, testnet;
 	private static Main mainGui;
 	
 	private static Random random;
@@ -110,6 +123,8 @@ public class Constants {
 	public static Color flatOrangeHover;
 	public static Color flatBlueHover;
 	public static Color flatGreenHover;
+	public static Color backgroundColor;
+	public static Color loggedinBackgroundColor;
 	public static Font walletNameFont;
 	public static Font walletBalanceFont;
 	public static Font dcrFont;
@@ -127,6 +142,7 @@ public class Constants {
 	public static ArrayList<Contact> contacts = new ArrayList<Contact>();
 	public static ArrayList<String> langConfFiles = new ArrayList<String>();
 	public static HashMap<String, String> langValues = new HashMap<String, String>();
+	public static ArrayList<String> stakePools = new ArrayList<String>();
 	public static Navbar navbar;
 	public static GlobalCache globalCache;
 	public static String accountToRename;
@@ -136,8 +152,8 @@ public class Constants {
 	 * Initialise constants.
 	 */
 	public static void initialise() {
-		version = "0.1.0-beta";
-		buildDate = "12/05/2016";
+		version = "0.2.0";
+		buildDate = "14/06/2016";
 		random = new Random();
 		guiLog = new ArrayList<String>();
 		langFiles = new ArrayList<String>();
@@ -170,7 +186,18 @@ public class Constants {
 		extraWalletArguments = "";
 		extraDcrctlArguments = "";
 		
+		//Add stake pools (This wont stop users from joining any pool)
+		stakePools.add("pos-bravo");
+		stakePools.add("pos-delta");
+		stakePools.add("pos-echo");
+		stakePools.add("pos-foxtrot");
+		stakePools.add("pos-golf");
+		stakePools.add("pos-hotel");
+		stakePools.add("pos-india");		
+		
+		
 		userHome = System.getProperty("user.home") + File.separator + "DecredWallet" + File.separator;
+		keystore = userHome + "decredWalletKeystore";
 		settingsFile = new File(userHome + "settings.conf");
 		langFolder = new File(userHome + File.separator + "lang");
 		dcrdCert = new File(dcrdFolder + File.separator + "rpc.cert");
@@ -178,11 +205,11 @@ public class Constants {
 		allowedPasswordClasses = new ArrayList<String>();
 		allowedPasswordClasses.add("com.hosvir.decredwallet.DecredWallet");
 		allowedPasswordClasses.add("com.hosvir.decredwallet.Api");
-		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Send");
-		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.SettingsSecurity");		
+		allowedPasswordClasses.add("com.hosvir.decredwallet.utils.Keystore");
+		allowedPasswordClasses.add("com.hosvir.decredwallet.gui.interfaces.Login");
 		
 		langConfFiles.add("English.conf");
-		langConfFiles.add("Deutsch.conf");
+		langConfFiles.add("German.conf");
 		langConfFiles.add("Chinese.conf");
 		langConfFiles.add("Japanese.conf");
 		langConfFiles.add("Spanish.conf");
@@ -230,8 +257,10 @@ public class Constants {
 			doubleClickDelay = Integer.valueOf(properties.getProperty("Double-Click-Delay"));
 			scrollDistance = Integer.valueOf(properties.getProperty("Scroll-Distance"));
 			maxLogLines = Integer.valueOf(properties.getProperty("Max-Log-Lines"));
+			keystorePassword = properties.getProperty("Keystore-Password");
 			fpsMax = Integer.valueOf(properties.getProperty("FPS-Max"));
 			fpsMin = Integer.valueOf(properties.getProperty("FPS-Min"));
+			debug = Boolean.valueOf(properties.getProperty("Debug"));
 			
 			if(!decredLocation.endsWith(File.separator)) decredLocation += File.separator;
 			
@@ -246,6 +275,40 @@ public class Constants {
 				
 				System.exit(1);
 			}
+			
+			
+			//Import local certificates
+			if(getOS().contains("Windows")){
+				if(new File(System.getProperty("user.home") + File.separator + "AppData" + File.separator + "Local" + File.separator + "Dcrd" + File.separator + "rpc.cert").exists()){
+					Keystore.importCertificate(System.getProperty("user.home") + File.separator + 
+							"AppData" + File.separator + 
+							"Local" + File.separator + 
+							"Dcrd" + File.separator + 
+							"rpc.cert", "dcrd", keystore);
+					Keystore.importCertificate(System.getProperty("user.home") + File.separator + 
+							"AppData" + File.separator + 
+							"Local" + File.separator + 
+							"Dcrwallet" + File.separator + 
+							"rpc.cert", "dcrwallet", keystore);
+				}
+			}else{
+				if(new File(System.getProperty("user.home") + File.separator + ".dcrd" + File.separator + "rpc.cert").exists()){
+					Keystore.importCertificate(System.getProperty("user.home") + File.separator + 
+							".dcrd" + File.separator + 
+							"rpc.cert", "dcrd", keystore);
+					Keystore.importCertificate(System.getProperty("user.home") + File.separator + 
+							".dcrwallet" + File.separator + 
+							"rpc.cert", "dcrwallet", keystore);
+				}
+				
+				dcrdFolder = System.getProperty("user.home") + File.separator + ".dcrd";
+				dcrwalletFolder = System.getProperty("user.home") + File.separator + ".dcrwallet";
+			}
+			
+			//Change Key store		
+			Keystore.loadKeystore(userHome + "decredWalletKeystore");
+			System.setProperty("javax.net.ssl.trustStore", userHome + "decredWalletKeystore");
+			System.setProperty("javax.net.ssl.trustStorePassword", keystorePassword);
 			
 			//Check for public pass
 			if(publicPassPhrase != null && publicPassPhrase.length() > 1){
@@ -263,6 +326,16 @@ public class Constants {
 			System.out.println("Unable to find settings file.");
 			e.printStackTrace();
 		}
+		
+		
+		//Web socket URIs
+		rpcProtocol = "wss://";
+		rpcProtocolEnd = "/ws";
+		rpcDaemonPort = testnet ? "19109" : "9109";
+		rpcWalletPort = testnet ? "19110" : "9110";
+		rpcDaemonIp = "127.0.0.1";
+		rpcWalletIp = "127.0.0.1";
+		
 		
 		daemonCommand = osQuote + decredLocation + daemonBin + osQuote + " -u " + osQuote + 
 						daemonUsername + osQuote + " -P " + osQuote +
@@ -293,6 +366,8 @@ public class Constants {
 		flatOrangeHover = new Color(211, 84, 0);
 		flatBlueHover = new Color(41, 128, 185);
 		flatGreenHover = new Color(39, 174, 96);
+		backgroundColor = new Color(44, 62, 80);
+		loggedinBackgroundColor = new Color(241,241,241);
 		walletNameFont = new Font("Arial", 1, 25);
 		walletBalanceFont = new Font("Arial", 1, 18);
 		dcrFont = new Font("Arial", 0, 30);
@@ -364,7 +439,7 @@ public class Constants {
 	/**
 	 * Create default properties
 	 */
-	private static void createDefaultProperties(){
+	private static void createDefaultProperties() {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Decred settings", false, false);
 		
 		if(getOS().contains("Windows")){
@@ -383,12 +458,14 @@ public class Constants {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Double-Click-Delay=400", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Scroll-Distance=30", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Max-Log-Lines=500", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Keystore-Password=" + generateRandomString(32), true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Display settings", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=true", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-FPS=false", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Max=30", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=10", true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Debug=false", true, true);
 		
 		//Create version file
 		FileWriter.writeToFile(userHome + ".version.conf", "Version=" + version, false, false);
@@ -398,6 +475,9 @@ public class Constants {
 		
 		//Create lang folder
 		langFolder.mkdir();
+		
+		//Create Key store
+		Keystore.createNewKeystore(userHome + "decredWalletKeystore");
 	
 		log("Default properties file has been created, edit settings.conf and then restart the program.");
 		
@@ -439,12 +519,14 @@ public class Constants {
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Double-Click-Delay=" + doubleClickDelay, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Scroll-Distance=" + scrollDistance, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Max-Log-Lines=" + maxLogLines, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Keystore-Password=" + keystorePassword, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "#Display settings", true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-OpenGL=" + enableOpenGL, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Enable-FPS=" + enableFps, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Max=" + fpsMax, true, true);
 		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "FPS-Min=" + fpsMin, true, true);
+		FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Debug=" + debug, true, true);
 	}
 	
 	/**
@@ -466,6 +548,27 @@ public class Constants {
 		//Create contacts file
 		if(!new File(userHome + "contacts.data").exists()){
 			FileWriter.writeToFile(userHome + "contacts.data", "Donate:fsig@hmamail.com:DsmcWt82aeraJ22bayUtMXm8dyRL8bFnBVY", false, false);
+		}
+		
+		//Add debug flag
+		try{
+			properties.load(new FileInputStream(settingsFile));
+			
+			//New debug setting
+			if(properties.getProperty("Debug") == null){
+				FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Debug=false", true, true);
+			}
+			
+			//New key store setting
+			if(properties.getProperty("Keystore-Password") == null){
+				keystorePassword = generateRandomString(32);
+				FileWriter.writeToFile(settingsFile.getAbsolutePath(), "Keystore-Password=" + keystorePassword, true, true);
+
+				//Create Key store
+				Keystore.createNewKeystore(userHome + "decredWalletKeystore");
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		
 		//Last, update version
@@ -632,6 +735,24 @@ public class Constants {
 	}
 	
 	/**
+	 * Generate a random string.
+	 * 
+	 * @param length
+	 * @return String
+	 */
+	public static String generateRandomString(int length) {
+		String characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		StringBuilder sb = new StringBuilder(length);
+		Random random = new Random();
+		
+		for(int i = 0; i < length; i++){
+			sb.append(characters.charAt(random.nextInt(characters.length())));
+		}
+		
+		return sb.toString();
+	}
+	
+	/**
 	 * Get the Operating System name, architecture and version.
 	 * 
 	 * @return String
@@ -688,11 +809,12 @@ public class Constants {
 		accounts.clear();
 		accountNames.clear();
 		
-		for(JsonObject jo : Api.getAccounts())
-			for(JsonObjects jos : jo.getJsonObjects()) {
+		for(JsonObjects jos : Api.getAccounts().get(0).getJsonObjects()){
+			if(!jos.getName().trim().equals("result")){
 				accounts.add(new Account(jos.getName()));
 				accountNames.add(jos.getName());
 			}
+		}
 		
 		//Reset rectangles for interfaces
 		guiInterfaces.get(0).rectangles = null;
@@ -714,12 +836,54 @@ public class Constants {
 		if(Constants.accounts.get(0).name.trim().equals(name.trim())) isDefault = true;
 		ArrayList<JsonObject> transactions = new ArrayList<JsonObject>();
 		
-		for(JsonObject jo : Constants.globalCache.transactions){
-			if(jo.getValueByName("account").trim().equals(name.trim()) || (isDefault && jo.getValueByName("account").trim().length() == 0))
-				transactions.add(jo);
+		if(name.trim().equals("imported")) {
+			for(int i = 0; i < Constants.globalCache.transactions.size() -3; i++){
+				if(Constants.globalCache.transactions.get(i).getValueByName("account").trim().equals(name.trim()) || 
+						(Constants.globalCache.transactions.get(i).getValueByName("txtype").trim().equals("vote")))
+					transactions.add(Constants.globalCache.transactions.get(i));
+			}
+		}else{
+			for(int i = 0; i < Constants.globalCache.transactions.size() -3; i++){
+				if(Constants.globalCache.transactions.get(i).getValueByName("account").trim().equals(name.trim()) || 
+						(isDefault && Constants.globalCache.transactions.get(i).getValueByName("account").trim().length() == 0 && 
+						!Constants.globalCache.transactions.get(i).getValueByName("txtype").trim().equals("vote")))
+					transactions.add(Constants.globalCache.transactions.get(i));
+			}
 		}
+		
+		
 			
 		return transactions;
+	}
+	
+	public static Account getAccountByName(String name) {
+		for(Account a : accounts){
+			if(a.name.trim().equals(name.trim()))
+				return a;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Open the specified URL.
+	 * 
+	 * @param url
+	 */
+	public static void openLink(String url) {
+		if(Desktop.isDesktopSupported()) {
+			try {
+				Desktop.getDesktop().browse(new URI(url));
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static boolean isPrivatePassphraseSet() {
+		if(privatePassPhrase != null && privatePassPhrase != "") return true;
+		
+		return false;
 	}
 
 	public static String getVersion() {
@@ -876,6 +1040,112 @@ public class Constants {
 	
 	public static String getOsQuote() {
 		return osQuote;
+	}
+
+	public static DecredEndpoint getDcrdEndpoint() {
+		return dcrdEndpoint;
+	}
+
+	public static void setDcrdEndpoint(DecredEndpoint dcrdEndpoint) {
+		Constants.dcrdEndpoint = dcrdEndpoint;
+	}
+	
+	public static void setDcrdEnpointURI(String uri){
+		rpcDaemonIp = uri;
+		dcrdEndpoint.uri = rpcProtocol + rpcDaemonIp + ":" + rpcDaemonPort + rpcProtocolEnd;
+	}
+
+	public static DecredEndpoint getDcrwalletEndpoint() {
+		return dcrwalletEndpoint;
+	}
+
+	public static void setDcrwalletEndpoint(DecredEndpoint dcrwalletEndpoint) {
+		Constants.dcrwalletEndpoint = dcrwalletEndpoint;
+	}
+	
+	public static void setDcrwalletEnpointURI(String uri){
+		rpcWalletIp = uri;
+		dcrwalletEndpoint.uri = rpcProtocol + rpcWalletIp + ":" + rpcWalletPort + rpcProtocolEnd;
+	}
+
+	public static boolean isDebug() {
+		return debug;
+	}
+
+	public static void setDebug(boolean debug) {
+		Constants.debug = debug;
+	}
+
+	public static String getRpcProtocol() {
+		return rpcProtocol;
+	}
+
+	public static void setRpcProtocol(String rpcProtocol) {
+		Constants.rpcProtocol = rpcProtocol;
+	}
+
+	public static String getRpcProtocolEnd() {
+		return rpcProtocolEnd;
+	}
+
+	public static void setRpcProtocolEnd(String rpcProtocolEnd) {
+		Constants.rpcProtocolEnd = rpcProtocolEnd;
+	}
+
+	public static String getRpcDaemonIp() {
+		return rpcDaemonIp;
+	}
+
+	public static void setRpcDaemonIp(String rpcDaemonIp) {
+		Constants.rpcDaemonIp = rpcDaemonIp;
+	}
+
+	public static String getRpcWalletIp() {
+		return rpcWalletIp;
+	}
+
+	public static void setRpcWalletIp(String rpcWalletIp) {
+		Constants.rpcWalletIp = rpcWalletIp;
+	}
+
+	public static String getRpcDaemonPort() {
+		return rpcDaemonPort;
+	}
+
+	public static void setRpcDaemonPort(String rpcDaemonPort) {
+		Constants.rpcDaemonPort = rpcDaemonPort;
+	}
+
+	public static String getRpcWalletPort() {
+		return rpcWalletPort;
+	}
+
+	public static void setRpcWalletPort(String rpcWalletPort) {
+		Constants.rpcWalletPort = rpcWalletPort;
+	}
+
+	public static String getKeystorePassword() {
+		return allowedPasswordClass() ? keystorePassword : null;
+	}
+
+	public static boolean isDaemonProcessReady() {
+		return daemonProcessReady;
+	}
+
+	public static void setDaemonProcessReady(boolean daemonProcessReady) {
+		Constants.daemonProcessReady = daemonProcessReady;
+	}
+
+	public static boolean isWalletProcessReady() {
+		return walletProcessReady;
+	}
+
+	public static void setWalletProcessReady(boolean walletProcessReady) {
+		Constants.walletProcessReady = walletProcessReady;
+	}
+
+	public static String getKeystore() {
+		return keystore;
 	}
 	
 }

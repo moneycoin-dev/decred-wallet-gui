@@ -2,6 +2,9 @@
 Decred Wallet GUI is a front end built in Java using the Canvas with an OpenGL pipeline for rendering graphics.
 All components are made using Graphics2D and images where required, this gives us full flexibility to create anything we want without the limitations of swing or other frameworks.
 
+Calls to DCRD and DCRWALLET are made via RPC, if the specified address is localhost the GUI will start the DCRD and DCRWALLET process if they are not already running.
+Certificates are stored within a custom Keystore with a generated password that is added to your settings.conf.
+
 ####Index:
 * [Downloads](#download-binaries)  
 * [Features](#features)
@@ -22,6 +25,12 @@ ___
 * Render control
   * When the window is out of focus it will reduce the update rate
   * This means the process will use at little resources as possible
+* RPC 
+  * All calls are now made using RPC with SSL
+  * Connect to DCRD and DCRWALLET outside of local network
+* Connect to specified address
+  * Imports local certificates automatically
+  * Import custom certificates manually
 * Cached results
   * Realtime updates on actions
 * Accounts
@@ -29,7 +38,9 @@ ___
   * Add accounts
   * Rename accounts
 * Transactions
-  * List Transactions
+  * Listed by account
+  * Transaction type
+  * Sent / Received
 * Contacts
   * Add unlimited
   * Remove
@@ -37,10 +48,14 @@ ___
 * Balance
   * View total by account
   * View spendable by account
+  * View pending by account
   * View locked by account
 * Stake mining
   * View stake info
-  * Manual ticket purchase
+  * View tickets
+  * Ticket purchase
+  * Get public key for pool
+  * Import script for pool
 * Send coins
   * Send from specified account
   * Send to contact
@@ -54,7 +69,7 @@ ___
   * Wallet log
   * Gui log
 * Language
-  * Supports multiple languge though conf files
+  * Supports multiple languges though conf files
 * Security
   * Dump private key
   * Change passphrase
@@ -71,7 +86,8 @@ ___
 Building and installing has been tested on Debian based Linux.
 
 ###### Requirements
-* JDK 1.7 or greater
+* JDK 1.8 or greater
+* ANT: http://ant.apache.org/ or manual JAR packaging
 
 ###### Install
 * Open a terminal and cd into **bin**
@@ -88,7 +104,8 @@ ___
 Building has been tested on Windows 7.
 
 ###### Requirements
-* JDK 1.7 or greater
+* JDK 1.8 or greater
+* ANT: http://ant.apache.org/ or manual JAR packaging
 
 ###### Install
 * Open a command prompt and cd into **bin**

@@ -195,4 +195,20 @@ public class DropdownBox extends Component implements KeyListener {
 		}
 	}
 
+	public String[] getLineItems() {
+		return lineItems;
+	}
+
+	public void setLineItems(String[] lineItems) {
+		this.lineItems = lineItems;
+		
+		if(lineItems != null){
+			this.itemRectangles = new Rectangle[lineItems.length];
+			
+			for(int i = 0; i < lineItems.length; i++){
+				itemRectangles[i] = new Rectangle(x, y + ((i+1) * height), width, height);
+			}
+		}
+	}
+
 }

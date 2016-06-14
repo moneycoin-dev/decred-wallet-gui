@@ -28,6 +28,9 @@ public class Receive extends Interface implements MouseWheelListener {
 	private int scrollOffset = 0;
 	private Rectangle[] receiveRectangles;
 	public int receiveHoverId = -1;
+	private int scrollMinHeight = 160;
+	private int scrollMaxHeight;
+	private double scrollCurrentPosition = 160;
 	
 	@Override
 	public void init() {
@@ -35,6 +38,8 @@ public class Receive extends Interface implements MouseWheelListener {
 		
 		this.components.add(new Button("new", Constants.getLangValue("Get-New-Button-Text"), Engine.getWidth() - 150, 200, 100, 35, Constants.flatBlue, Constants.flatBlueHover));
 		this.components.add(new Dialog("newaddr", Constants.getLangValue("New-Address-Message")));
+		
+		scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
 		
 		Main.canvas.addMouseWheelListener(this);
 	}
@@ -78,7 +83,7 @@ public class Receive extends Interface implements MouseWheelListener {
 			}
 			
 			//Rename account
-			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("imported")){
+			if(doubleClicked && !Constants.accounts.get(selectedId).name.startsWith("default") && !Constants.accounts.get(selectedId).name.startsWith("imported")){
 				Constants.accountToRename = Constants.accounts.get(selectedId).name;
 				blockInput = true;
 				Constants.navbar.blockInput = true;
@@ -88,7 +93,7 @@ public class Receive extends Interface implements MouseWheelListener {
 		
 		
 		//Receive rectangles
-		if(receiveRectangles == null && Constants.accounts.get(selectedId).addresses.length > 0){
+		if(receiveRectangles == null && Constants.accounts.get(selectedId).addresses != null && Constants.accounts.get(selectedId).addresses.length > 0){
 			receiveRectangles = new Rectangle[Constants.accounts.get(selectedId).addresses.length];
 			
 			for(int i = 0; i < receiveRectangles.length; i++){
@@ -163,7 +168,14 @@ public class Receive extends Interface implements MouseWheelListener {
 				
 				g.drawString(Constants.accounts.get(selectedId).addresses[i], 340, 215 + i*30 - scrollOffset);
 			}
-		}		
+		}	
+		
+		//Scroll bar
+		if(Constants.accounts.get(selectedId).addresses.length > 0) {
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawLine(Engine.getWidth() - 10, 100, Engine.getWidth() - 10, Engine.getHeight());
+			g.fillRect(Engine.getWidth() - 10, (int)scrollCurrentPosition, 10, 60);
+		}
 		
 		//Header
 		g.setColor(Color.WHITE);
@@ -218,7 +230,7 @@ public class Receive extends Interface implements MouseWheelListener {
 				//Wallet Balance
 				g.setColor(Constants.walletBalanceColor);
 				g.setFont(Constants.walletBalanceFont);
-				g.drawString("" + Constants.accounts.get(i).balance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).balance), 98 + i*60);
+				g.drawString("" + Constants.accounts.get(i).totalBalance, 285 - g.getFontMetrics().stringWidth("" + Constants.accounts.get(i).totalBalance), 98 + i*60);
 			}
 		}
 	
@@ -232,7 +244,7 @@ public class Receive extends Interface implements MouseWheelListener {
 			
 			g.setColor(Constants.walletNameColor);
 			g.setFont(Constants.totalBalanceFont);
-			g.drawString("" + Constants.accounts.get(selectedId).balance, (Engine.getWidth() + 150) / 2, 100);
+			g.drawString("" + Constants.accounts.get(selectedId).totalBalance, (Engine.getWidth() + 150) / 2, 100);
 			
 			
 			//Available, Pending and Locked
@@ -269,7 +281,7 @@ public class Receive extends Interface implements MouseWheelListener {
 
 	@Override
 	public boolean isActive() {
-		return Constants.navbar.selectedId == 2;
+		return Constants.navbar.selectedId == 4;
 	}
 
 	@Override
@@ -277,12 +289,22 @@ public class Receive extends Interface implements MouseWheelListener {
 		if(isActive()){
 			if(e.getUnitsToScroll() > 0){
 				scrollOffset += Constants.scrollDistance;
+				if(Constants.accounts.get(selectedId).addresses.length > 1)
+				scrollCurrentPosition += (Engine.getHeight() - scrollMinHeight - 60) / (Constants.accounts.get(selectedId).addresses.length -1);
 			}else{
 				scrollOffset -= Constants.scrollDistance;
+				if(Constants.accounts.get(selectedId).addresses.length > 1)
+				scrollCurrentPosition -= (Engine.getHeight() - scrollMinHeight - 60) / (Constants.accounts.get(selectedId).addresses.length -1);
 			}
 			
 			if(scrollOffset < 0) scrollOffset = 0;
 			if(scrollOffset > (Constants.accounts.get(selectedId).addresses.length-1)*30) scrollOffset = (Constants.accounts.get(selectedId).addresses.length-1)*30;
+			
+			if(Constants.accounts.get(selectedId).addresses.length > 0){
+				scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
+				if(scrollCurrentPosition < scrollMinHeight) scrollCurrentPosition = scrollMinHeight;
+				if(scrollCurrentPosition > scrollMaxHeight) scrollCurrentPosition = scrollMaxHeight;
+			}
 			
 			receiveRectangles = null;
 		}

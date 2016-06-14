@@ -209,9 +209,9 @@ public class Settings extends Interface {
 		
 		g.setFont(Constants.settingsFont);
 		g.setColor(Constants.walletBalanceColor);
-		g.drawString(Constants.getLangValue("Main-Button-Text"), 60, 105);
-		g.drawString(Constants.getLangValue("Security-Button-Text"), 210, 105);
-		g.drawString(Constants.getLangValue("Network-Button-Text"), 375, 105);
+		g.drawString(Constants.getLangValue("Main-Button-Text"), 170 - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("Main-Button-Text")) / 2), 105);
+		g.drawString(Constants.getLangValue("Security-Button-Text"), (170 * 2) - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("Security-Button-Text")) / 2), 105);
+		g.drawString(Constants.getLangValue("Network-Button-Text"), (170 * 3) - 85 - (g.getFontMetrics().stringWidth(Constants.getLangValue("Network-Button-Text")) / 2), 105);
 		
 		
 		if(selectedId == 0){

@@ -1,6 +1,7 @@
 package com.hosvir.decredwallet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.deadendgine.Updatable;
 import com.deadendgine.utils.Timer;
@@ -16,20 +17,25 @@ public class GlobalCache extends Thread implements Updatable {
 	public boolean forceUpdate;
 	public boolean forceUpdateInfo;
 	public boolean forceUpdatePeers;
+	public boolean forceUpdateTickets;
 	private Timer updateTimer = new Timer(1000);
 	private Timer infoTimer = new Timer(1000);
 	private Timer peerTimer = new Timer(1000);
+	private Timer ticketTimer = new Timer(1000);
 	public String walletFee = "0.00";
 	public ArrayList<JsonObject> transactions;
 	public ArrayList<JsonObject> info;
 	public ArrayList<JsonObject> stakeInfo;
 	public ArrayList<JsonObject> peers;
+	public ArrayList<Ticket> tickets;
+	private TicketComparator tc = new TicketComparator();
 	
 	public GlobalCache() {
 		transactions = new ArrayList<JsonObject>();
 		info = new ArrayList<JsonObject>();
 		stakeInfo = new ArrayList<JsonObject>();
 		peers = new ArrayList<JsonObject>();
+		tickets = new ArrayList<Ticket>();
 		
 		this.setName("Decred Wallet - Cache Thread");
 		this.setPriority(NORM_PRIORITY);
@@ -81,6 +87,22 @@ public class GlobalCache extends Thread implements Updatable {
 			if(peerTimer.timeLimit <= 10000) peerTimer.timeLimit = Constants.getRandomNumber(10000, 45000);
 			peerTimer.reset();
 			forceUpdatePeers = false;
+		}
+		
+		//Ticket update
+		if(ticketTimer.isUp() || forceUpdateTickets){
+			tickets.clear();
+			
+			for(String s : Api.getTickets(true).split(",")){
+				tickets.add(new Ticket(s));
+			}
+			
+			//Sort ticket order
+			Collections.sort(tickets, tc);
+			
+			if(ticketTimer.timeLimit <= 10000) ticketTimer.timeLimit = Constants.getRandomNumber(60000, 300000);
+			ticketTimer.reset();
+			forceUpdateTickets = false;
 		}
 	}
 	

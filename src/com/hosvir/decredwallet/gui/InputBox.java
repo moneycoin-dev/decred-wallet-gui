@@ -1,5 +1,6 @@
 package com.hosvir.decredwallet.gui;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -40,14 +41,16 @@ public class InputBox extends Component implements KeyListener {
 
 	@Override
 	public void render(Graphics2D g) {
-		if(enabled && (hoverId == 0 || selectedId == 0)) g.setColor(hoverColor); else g.setColor(borderColor);
-		
-		g.drawRect(x, y, width, height);
-		
 		if(!enabled) {
 			g.setColor(borderColor);
 			g.fillRect(x, y, width, height);
+		}else{
+			g.setColor(Color.WHITE);
+			g.fillRect(x, y, width, height);
 		}
+		
+		if(enabled && (hoverId == 0 || selectedId == 0)) g.setColor(hoverColor); else g.setColor(borderColor);
+		g.drawRect(x, y, width, height);
 		
 		g.setColor(textColor);
 		g.setFont(textFont);
@@ -61,6 +64,12 @@ public class InputBox extends Component implements KeyListener {
 			g.drawString(newText, x + 10, y + (height / 2) + 8);
 		}else{
 			g.drawString(text, x + 10, y + (height / 2) + 8);
+		}
+		
+		if(selectedId == -1 && placeholderText != null && placeholderText != "" && text == ""){
+			g.setColor(textColor);
+			g.setFont(Constants.labelFont);
+			g.drawString(placeholderText, x + 10, y + (height / 2) + 6);
 		}
 	}
 	

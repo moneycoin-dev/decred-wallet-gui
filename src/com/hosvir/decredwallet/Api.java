@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.hosvir.decredwallet.utils.Json;
 import com.hosvir.decredwallet.utils.JsonObject;
+import com.hosvir.decredwallet.utils.Param;
 
 /**
  * 
@@ -11,116 +12,141 @@ import com.hosvir.decredwallet.utils.JsonObject;
  *
  */
 public class Api {
-	private static LocalCommand command = new LocalCommand();
 	
 	public synchronized static ArrayList<JsonObject> getInfo() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " getinfo"));
+		return Json.parseJson(Constants.getDcrdEndpoint().callMethod("getinfo", null));
 	}
 	
 	public synchronized static ArrayList<JsonObject> getPeerInfo() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " getpeerinfo"));
+		return Json.parseJson(Constants.getDcrdEndpoint().callMethod("getpeerinfo", null));
 	}
 	
-	public synchronized static void disconnectPeer(String id) {
-		command.execute(Constants.getDcrctlBaseCommand() + " node disconnect " + id + " temp");
+	public synchronized static String disconnectPeer(String id) {
+		return processJsonResult(Json.parseJson(Constants.getDcrdEndpoint().callMethod("node disconnect", new Param[]{new Param(1,id), new Param(0,"temp")})));
 	}
 	
 	public synchronized static void ping() {
-		command.execute(Constants.getDcrctlBaseCommand() + " ping");
+		Constants.getDcrdEndpoint().callMethod("ping", null);
+	}
+	
+	public synchronized static String existsLiveTicket(String ticketHash) {
+		return processJsonResult(Json.parseJson(Constants.getDcrdEndpoint().callMethod("existsliveticket", new Param[]{new Param(0,ticketHash)})));
 	}
 	
 	
 	
 	public synchronized static String getBalance(String name) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getbalance " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote() + 
-				" 0 spendable");
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getbalance", new Param[]{
+				new Param(0,name)})).get(0).getValueByName("result");
+	}
+	
+	public synchronized static String getBalanceSpendable(String name) {
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getbalance", new Param[]{
+				new Param(0,name), 
+				new Param(1,"0"),
+				new Param(0,"spendable")})).get(0).getValueByName("result");
 	}
 	
 	public synchronized static String getLockedBalance(String name) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getbalance " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote() + 
-				" 0 locked");
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getbalance", new Param[]{
+				new Param(0,name), 
+				new Param(1,"0"), 
+				new Param(0,"locked")})).get(0).getValueByName("result");
 	}
 	
 	public synchronized static String getBalanceAll(String name) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getbalance " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote() + 
-				" 0 all");
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getbalance", new Param[]{
+				new Param(0,name), 
+				new Param(1,"0"), 
+				new Param(0,"all")})).get(0).getValueByName("result");
 	}
 	
 	public synchronized static ArrayList<JsonObject> getTransactions() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet listtransactions"));
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("listtransactions", null));
 	}
 	
 	public synchronized static ArrayList<JsonObject> getTransactions(String name) {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet listtransactions " + Constants.getOsQuote() + name + Constants.getOsQuote()));
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("listtransactions", new Param[]{new Param(0,name)}));
 	}
 	
 	public synchronized static ArrayList<JsonObject> getAccounts() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet listaccounts"));
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("listaccounts", null));
 	}
 	
 	public synchronized static String getWalletFee() {
-		return String.valueOf(Double.valueOf(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getwalletfee").trim()));
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getwalletfee", null)).get(0).getValueByName("result");
 	}
 	
 	public synchronized static String getStakeDifficulty() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getstakedifficulty")).get(0).getValueByName("current");
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getstakedifficulty", null)).get(0).getValueByName("current");
 	}
 	
 	public synchronized static String getAddressesByAccount(String name) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getaddressesbyaccount " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote()).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", "");
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getaddressesbyaccount", new Param[]{new Param(0,name)})));
 	}
 	
 	public synchronized static String getNewAddress(String name) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getnewaddress " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote());
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getnewaddress", new Param[]{new Param(0,name)})).get(0).getValueByName("result");
 	}
 	
 	public synchronized static String unlockWallet(String timeout) {
-		String result = command.execute(Constants.getDcrctlBaseCommand() + " --wallet walletpassphrase " + 
-				Constants.getOsQuote() + Constants.getPrivatePassPhrase() + Constants.getOsQuote() + " " + timeout);
+		String result = processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("walletpassphrase", new Param[]{
+				new Param(0,Constants.getPrivatePassPhrase()), 
+				new Param(1,timeout)})));
 		
 		Constants.setPrivatePassPhrase(null);
 		return result;
 	}
 	
-	public synchronized static void renameAccount(String old, String name) {
-		command.execute(Constants.getDcrctlBaseCommand() + " --wallet renameaccount " + 
-				Constants.getOsQuote() + old + Constants.getOsQuote() + " " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote());
+	public synchronized static String renameAccount(String old, String name) {
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("renameaccount", new Param[]{new Param(0,old), new Param(0,name)})));
 	}
 	
-	public synchronized static void createNewAccount(String name) {
-		command.execute(Constants.getDcrctlBaseCommand() + " --wallet createnewaccount " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote());
+	public synchronized static String createNewAccount(String name) {
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("createnewaccount", new Param[]{new Param(0,name)})));
 	}
 	
 	public synchronized static ArrayList<JsonObject> getStakeInfo() {
-		return Json.parseJson(command.execute(Constants.getDcrctlBaseCommand() + " --wallet getstakeinfo"));
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getstakeinfo",null));
 	}
 	
 	public synchronized static boolean setTxFee(String fee) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet settxfee " + fee).startsWith("true");
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("settxfee",new Param[]{new Param(1,fee)})).get(0).getValueByName("result").trim().equals("true");
 	}
 
 	public synchronized static String sendFrom(String name, String toAddress, String comment, String amount) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet sendfrom " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote() + " " + 
-				Constants.getOsQuote() + toAddress + Constants.getOsQuote() + " " + amount);
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("sendfrom", new Param[]{
+				new Param(0,name), 
+				new Param(0,toAddress), 
+				new Param(1,amount)})));
 	}
 	
-	public synchronized static String purchaseTicket(String name, String spendLimit, String address) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet purchaseticket " + 
-				Constants.getOsQuote() + name + Constants.getOsQuote() + " " + spendLimit + " 1 " + 
-				Constants.getOsQuote() + address + Constants.getOsQuote());
+	public synchronized static String sendMany(String name, String toAddresses, String comment, String amounts){
+		return null;
+	}
+	
+	public synchronized static String purchaseTicket(String name, String spendLimit, String address, String numberOfTickets, String poolAddress, String poolFees) {
+		if(poolAddress == null || poolAddress == ""){
+			return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("purchaseticket", new Param[]{
+					new Param(0,name), 
+					new Param(1,spendLimit), 
+					new Param(1,"1"),
+					new Param(0,address),
+					new Param(1,numberOfTickets)})));
+		}else{
+			return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("purchaseticket", new Param[]{
+					new Param(0,name), 
+					new Param(1,spendLimit), 
+					new Param(1,"1"),
+					new Param(0,address),
+					new Param(1,numberOfTickets),
+					new Param(0,poolAddress),
+					new Param(1,poolFees)})));
+		}
 	}
 	
 	public synchronized static String dumpPrivKey(String address) {
-		String result = command.execute(Constants.getDcrctlBaseCommand() + " --wallet dumpprivkey " + 
-				Constants.getOsQuote() + address + Constants.getOsQuote());
+		String result = Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("dumpprivkey", new Param[]{new Param(0,address)})).get(0).getValueByName("result");
 		
 		Constants.setPrivatePassPhrase(null);
 		
@@ -128,18 +154,55 @@ public class Api {
 	}
 	
 	public synchronized static String wallPassphraseChange(String oldpassphrase, String newpassphrase) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet walletpassphrasechange " + 
-				Constants.getOsQuote() + oldpassphrase + Constants.getOsQuote() + " " + 
-				Constants.getOsQuote() + newpassphrase + Constants.getOsQuote());
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("purchaseticket", new Param[]{
+				new Param(0,oldpassphrase),
+				new Param(0,newpassphrase)})));
 	}
 	
 	public synchronized static String getMasterPubkey() {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet getmasterpubkey");
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getmasterpubkey", null)));
 	}
 	
 	public synchronized static String dumpWallet(String filename) {
-		return command.execute(Constants.getDcrctlBaseCommand() + " --wallet dumpwallet" + 
-				Constants.getOsQuote() + filename + Constants.getOsQuote());
+		return processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("dumpwallet", new Param[]{new Param(0,filename)})));
+	}
+	
+	public synchronized static String validateAddress(String address) {
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("validateaddress", new Param[]{new Param(0,address)})).get(0).getValueByName("pubkeyaddr");
+	}
+	
+	public synchronized static String importScript(String script) {		
+		String result = processJsonResult(Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("importscript", new Param[]{new Param(0,script)})));
+		
+		Constants.setPrivatePassPhrase(null);
+		
+		return result;
+	}
+	
+	public synchronized static String getTickets(boolean includeImmature) {
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("gettickets", new Param[]{new Param(1,String.valueOf(includeImmature))})).get(0).getValueByName("hashes");
+	}
+	
+	public synchronized static ArrayList<JsonObject> getTransaction(String txHash) {
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("gettransaction", new Param[]{new Param(0,txHash)}));
+	}
+	
+	public synchronized static JsonObject getBlock(String blockHash) {
+		return Json.parseJson(Constants.getDcrwalletEndpoint().callMethod("getblock", new Param[]{new Param(0,blockHash)})).get(0);
+	}
+	
+	/**
+	 * Check if the result is null, if so return the error JSON Object.
+	 * 
+	 * @param jsonObjects
+	 * @return String
+	 */
+	public synchronized static String processJsonResult(ArrayList<JsonObject> jsonObjects) {
+		if(jsonObjects.get(0).getValueByName("result").trim().equals("null")){
+			return jsonObjects.get(1).getValueByName("code") + ": " + jsonObjects.get(1).getValueByName("message");
+		}else{
+			return jsonObjects.get(0).getValueByName("result");
+		}
 	}
 
 }

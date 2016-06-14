@@ -13,12 +13,12 @@ import com.deadendgine.GameState;
 import com.deadendgine.graphics.GameCanvas;
 import com.deadendgine.input.Keyboard;
 import com.deadendgine.input.Mouse;
-import com.deadendgine.utils.Timer;
 import com.hosvir.decredwallet.Account;
 import com.hosvir.decredwallet.Api;
 import com.hosvir.decredwallet.Constants;
 import com.hosvir.decredwallet.Processes;
 import com.hosvir.decredwallet.gui.interfaces.AddressBook;
+import com.hosvir.decredwallet.gui.interfaces.Login;
 import com.hosvir.decredwallet.gui.interfaces.Logs;
 import com.hosvir.decredwallet.gui.interfaces.Navbar;
 import com.hosvir.decredwallet.gui.interfaces.Receive;
@@ -27,12 +27,13 @@ import com.hosvir.decredwallet.gui.interfaces.Settings;
 import com.hosvir.decredwallet.gui.interfaces.SettingsNetwork;
 import com.hosvir.decredwallet.gui.interfaces.SettingsSecurity;
 import com.hosvir.decredwallet.gui.interfaces.Staking;
+import com.hosvir.decredwallet.gui.interfaces.StakingPool;
+import com.hosvir.decredwallet.gui.interfaces.StakingPurchase;
 import com.hosvir.decredwallet.gui.interfaces.Wallet;
 import com.hosvir.decredwallet.gui.interfaces.popups.AddContact;
 import com.hosvir.decredwallet.gui.interfaces.popups.CreateAccount;
 import com.hosvir.decredwallet.gui.interfaces.popups.Passphrase;
 import com.hosvir.decredwallet.gui.interfaces.popups.RenameAccount;
-import com.hosvir.decredwallet.utils.JsonObject;
 import com.hosvir.decredwallet.utils.JsonObjects;
 
 /**
@@ -73,9 +74,6 @@ public class Main extends BaseGame {
 	public static float volume = 1.0f;
 	public static boolean sound = true;
 	
-	private Timer loadingAnimationTimer;
-	private int loadingAnimationCount;
-	private String loadingAnimationString = "";
 	public static boolean containsMouse = false;
 	
 	
@@ -130,8 +128,7 @@ public class Main extends BaseGame {
 		frame = new GameFrame("Decred Wallet", canvas);
 		frame.setResizable(true);
 		frame.setMinimumSize(new Dimension(Engine.getMinimumWidth(),Engine.getMinimumHeight()));
-		canvas.setBackground(new Color(241,241,241));
-		
+		canvas.setBackground(Constants.loggedinBackgroundColor);
 		
 		//Initialise the canvas
 		canvas.init();
@@ -149,9 +146,12 @@ public class Main extends BaseGame {
 		Images.init();
 		
 		Constants.navbar = new Navbar();
+		Constants.guiInterfaces.add(new Login());
 		Constants.guiInterfaces.add(new Wallet());
 		Constants.guiInterfaces.add(new AddressBook());
 		Constants.guiInterfaces.add(new Staking());
+		Constants.guiInterfaces.add(new StakingPurchase());
+		Constants.guiInterfaces.add(new StakingPool());
 		Constants.guiInterfaces.add(new Send());
 		Constants.guiInterfaces.add(new Receive());
 		Constants.guiInterfaces.add(new Logs());
@@ -166,8 +166,10 @@ public class Main extends BaseGame {
 		
 		Constants.navbar.init();
 		for(BaseGui bg : Constants.guiInterfaces) bg.init();
-		
-		loadingAnimationTimer = new Timer(1000);
+
+		frame.revalidate();
+		frame.repaint();
+		frame.setVisible(true);
 	}
 
 	@Override
@@ -176,7 +178,7 @@ public class Main extends BaseGame {
 		lastLoopTime = System.currentTimeMillis();
 		
 		while(true){
-			try{					
+			try{			
 				//Calculate FPS and time
 				lastTime = curTime;
 				curTime = System.currentTimeMillis();
@@ -231,22 +233,9 @@ public class Main extends BaseGame {
 		
 		
 		
-		if(!Constants.isDaemonReady() || !Constants.isWalletReady()){
-			if(loadingAnimationTimer.isUp()){
-				loadingAnimationCount++;
-				loadingAnimationString = "";
-				loadingAnimationTimer.reset();
-				
-				if(loadingAnimationCount > 3)
-					loadingAnimationCount = 0;
-				
-				for(int i = 0; i < loadingAnimationCount; i++){
-					loadingAnimationString += ".";
-				}
-			}
-			
-			Constants.guiInterfaces.get(5).update(delta);
-			if(Constants.guiInterfaces.get(5).containsMouse) containsMouse = true;
+		if(!Constants.isDaemonReady() || !Constants.isWalletReady()){			
+			Constants.guiInterfaces.get(0).update(delta);
+			if(Constants.guiInterfaces.get(0).containsMouse) containsMouse = true;
 			
 			//Restore cursor
 			if(!containsMouse){
@@ -256,11 +245,13 @@ public class Main extends BaseGame {
 			}
 		}else{
 			if(Constants.accounts.size() == 0){
-				for(JsonObject jo : Api.getAccounts())
-					for(JsonObjects jos : jo.getJsonObjects()){
+				if(Api.getAccounts() != null)
+				for(JsonObjects jos : Api.getAccounts().get(0).getJsonObjects()){
+					if(!jos.getName().trim().equals("result")){
 						Constants.accounts.add(new Account(jos.getName()));
 						Constants.accountNames.add(jos.getName());
 					}
+				}
 				
 				Constants.globalCache.forceUpdateInfo = true;
 				Constants.globalCache.forceUpdatePeers = true;
@@ -288,15 +279,16 @@ public class Main extends BaseGame {
 			
 			
 			//Cleanup logs, one log per update
+			// TODO allow handling for PROCESSES as well
 			if(Constants.guiLog.size() > Constants.maxLogLines) {
 				for(int i = 0; i < 100; i++)
 					Constants.guiLog.remove(i);
-			}else if(Constants.getDaemonProcess().log.size() > Constants.maxLogLines) {
+			}else if(Constants.getDcrdEndpoint().log.size() > Constants.maxLogLines) {
 				for(int i = 0; i < 100; i++)
-					Constants.getDaemonProcess().log.remove(i);
-			}else if(Constants.getWalletProcess().log.size() > Constants.maxLogLines) {
+					Constants.getDcrdEndpoint().log.remove(i);
+			}else if(Constants.getDcrwalletEndpoint().log.size() > Constants.maxLogLines) {
 				for(int i = 0; i < 100; i++)
-					Constants.getWalletProcess().log.remove(i);
+					Constants.getDcrwalletEndpoint().log.remove(i);
 			}
 		}
 	}
@@ -322,36 +314,9 @@ public class Main extends BaseGame {
 			
 			//Loading message
 			if(!Constants.isDaemonReady() || !Constants.isWalletReady()){	
-				Constants.guiInterfaces.get(5).render(g);
-				
-				/*g.setColor(Constants.transparentBlack);
-				g.fillRect(0, 0, Engine.getWidth(), Engine.getHeight());
-				
-				g.setColor(Color.WHITE);
-				g.fillRect(0, (Engine.getHeight() / 2) - 100, Engine.getWidth(), 200);*/
-				
-				g.setColor(Constants.flatRed);
-				g.setFont(Constants.dcrFont);
-				g.drawString("Loading" + loadingAnimationString, (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Loading") / 2), 30);
-				
-				g.setFont(Constants.labelFont);
-				if(!Constants.isDaemonReady()){
-					g.drawString("Daemon starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Daemon starting") / 2), 50);
-				}else{
-					g.drawString("Wallet starting", (Engine.getWidth() / 2) - (g.getFontMetrics().stringWidth("Wallet starting") / 2), 50);
-				}
+
 			}
 			
-			break;
-		case OPTIONS_MENU:		
-			break;
-		case PAUSE_MENU:		
-			break;
-		case PLAYING:
-			break;
-		case GAME_OVER:
-			break;
-		case CREDITS:
 			break;
 		default:
 			break;
@@ -374,8 +339,12 @@ public class Main extends BaseGame {
 	
 	@Override
 	public void quit() {		
-		Processes.killByName("dcrd");
-		Processes.killByName("dcrwallet");
+		Constants.getDcrdEndpoint().disconnect();
+		Constants.getDcrwalletEndpoint().disconnect();
+		
+		//Clean up after yourself, but only if we started it 
+		if(Constants.getDaemonProcess() != null) Processes.killByName("dcrd");
+		if(Constants.getWalletProcess() != null) Processes.killByName("dcrwallet");
 	}
 
 }

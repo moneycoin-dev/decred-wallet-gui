@@ -13,6 +13,7 @@ import com.hosvir.decredwallet.Constants;
 public abstract class Component extends BaseGui {
 	public String name;
 	public String text;
+	public String placeholderText;
 	public int id;
 	public int x;
 	public int y;

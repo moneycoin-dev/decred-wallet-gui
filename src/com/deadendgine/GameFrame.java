@@ -26,7 +26,7 @@ import com.deadendgine.utils.MathUtils;
  * @version 1.00
  *
  */
-public class GameFrame extends JFrame implements ComponentListener, WindowListener{
+public class GameFrame extends JFrame implements ComponentListener, WindowListener {
 	private static final long serialVersionUID = -8942902372792699702L;
 	private Toolkit toolkit = Toolkit.getDefaultToolkit();
 	private Dimension dim;
@@ -42,12 +42,10 @@ public class GameFrame extends JFrame implements ComponentListener, WindowListen
 	public GameFrame(String title, GameCanvas canvas){
 		this.setTitle(title);
 		this.setIconImage(Toolkit.getDefaultToolkit().getImage(GameFrame.class.getResource("/resources/icon.png")));
-		this.setSize(Engine.getWidth(), Engine.getHeight());
-		this.setPreferredSize(new Dimension(Engine.getPreferedWidth(), Engine.getPreferedHeight()));
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setLocationRelativeTo(null);
 		this.setResizable(false);
 		this.setIgnoreRepaint(true);
+		this.setLayout(null);
 		
 		dim = toolkit.getScreenSize();
 		Engine.setScreenWidth((int)dim.getWidth());
@@ -56,8 +54,12 @@ public class GameFrame extends JFrame implements ComponentListener, WindowListen
 		this.addComponentListener(this);
 		this.addWindowListener(this);
 		this.add(canvas);
+		
+		this.setPreferredSize(new Dimension(Engine.getPreferedWidth(), Engine.getPreferedHeight()));
+		this.setSize(Engine.getWidth(), Engine.getHeight());
+		this.setLocationRelativeTo(null);
+		this.pack();
 		this.setVisible(true);
-		canvas.requestFocus();
 	}
 	
 	/**

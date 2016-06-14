@@ -1,6 +1,5 @@
 package com.hosvir.decredwallet.gui.interfaces;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
@@ -18,7 +17,7 @@ public class Navbar extends BaseGui {
 	
 	@Override
 	public void init(){
-		selectedId = 1;
+		selectedId = -1;
 		
 		rectangles = new Rectangle[(Images.getIcons().length / 2)];
 		
@@ -76,13 +75,9 @@ public class Navbar extends BaseGui {
 					rectangles[i].width,
 					rectangles[i].height,
 					null);
-			
-
 		}
 		
-		
-		g.setColor(Color.PINK);
-		
+		//Hover nav item
 		if(hoverId != -1 && hoverId != selectedId){
 			g.drawImage(Images.getIcons()[hoverId], 
 					rectangles[hoverId].x, 

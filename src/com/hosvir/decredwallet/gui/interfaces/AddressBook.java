@@ -22,12 +22,17 @@ import com.hosvir.decredwallet.gui.Main;
  */
 public class AddressBook extends Interface implements MouseWheelListener {
 	private int scrollOffset = 0;
+	private int scrollMinHeight = 130;
+	private int scrollMaxHeight;
+	private int scrollCurrentPosition = 130;
 	
 	@Override
 	public void init() {		
 		this.components.add(new Button("add", Constants.getLangValue("Add-Button-Text"),20,80,100,35,Constants.flatBlue,Constants.flatBlueHover));
 		this.components.add(new Dialog("clipboard", Constants.getLangValue("Clipboard-Message")));
 		Main.canvas.addMouseWheelListener(this);
+		
+		scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
 	}
 	
 	@Override
@@ -160,6 +165,13 @@ public class AddressBook extends Interface implements MouseWheelListener {
 			}
 		}
 		
+		//Scroll bar
+		if(Constants.contacts.size() > 0) {
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawLine(Engine.getWidth() - 10, 100, Engine.getWidth() - 10, Engine.getHeight());
+			g.fillRect(Engine.getWidth() - 10, scrollCurrentPosition, 10, 60);
+		}
+		
 		//Second nav
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 
@@ -189,20 +201,30 @@ public class AddressBook extends Interface implements MouseWheelListener {
 
 	@Override
 	public boolean isActive() {
-		return Constants.navbar.selectedId == 5;
+		return Constants.navbar.selectedId == 2;
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		if(isActive()){
 			if(e.getUnitsToScroll() > 0){
-				scrollOffset += Constants.scrollDistance;
+				scrollOffset += 70;
+				if(Constants.contacts.size() > 0)
+				scrollCurrentPosition += (Engine.getHeight() - scrollMinHeight - 60) / (Constants.contacts.size() -1);
 			}else{
-				scrollOffset -= Constants.scrollDistance;
+				scrollOffset -= 70;
+				if(Constants.contacts.size() > 0)
+				scrollCurrentPosition -= (Engine.getHeight() - scrollMinHeight - 60) / (Constants.contacts.size() -1);
 			}
 			
 			if(scrollOffset < 0) scrollOffset = 0;
 			if(scrollOffset > (Constants.contacts.size()-1)*70) scrollOffset = (Constants.contacts.size()-1)*70;
+			
+			if(Constants.contacts.size() > 0){
+				scrollMaxHeight = Engine.getHeight() - (scrollMinHeight / 2);
+				if(scrollCurrentPosition < scrollMinHeight) scrollCurrentPosition = scrollMinHeight;
+				if(scrollCurrentPosition > scrollMaxHeight) scrollCurrentPosition = scrollMaxHeight;
+			}
 			
 			rectangles = null;
 		}
